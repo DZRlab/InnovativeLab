@@ -25,9 +25,6 @@ with open("/Users/anita-catrin/Documents/SAO/InnovativeLab/Contracts.csv", 'rb')
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
 df = pd.read_csv(io.StringIO(decoded_data), sep=';')
-#df['ContractPrice']= df['ContractPrice'].astype(float).astype(int)
-#df["ContractPrice"] = df["ContractPrice"].map("{:,.0f}".format)
-#df["ContractPrice"] = df["ContractPrice"].apply(lambda x: str(x).replace(",", "."))
 
 #df['ContractPrice '] = df['ContractPrice'].astype(float).astype(int)
 #df['ContractPrice'] = df['ContractPrice'].astype(str).replace('\.\d+', '', regex=True).astype(int)
@@ -51,10 +48,9 @@ keys1 = entity1
 values1 = entity1
 my_dict1 = {k: v for k, v in zip(keys1, values1)}
 
-# creating dict for drop-down VendorName
+# creating dict for drop-down checkbox_columns
 col_names = df.columns
 formatted_data = {item: item for item in col_names}
-#my_dict1 = {k: v for k, v in zip(keys1, values1)}
 
 #PREVIEW
 app_ui = ui.page_navbar(
@@ -100,7 +96,7 @@ app_ui = ui.page_navbar(
             ),
             ui.input_checkbox_group(  
                 "checkbox_columns",  
-                "Checkbox columns",  
+                "Select columns to remove:",  
                 formatted_data, 
                 ),
         ),
@@ -171,7 +167,7 @@ app_ui = ui.page_navbar(
         ui.output_data_frame("df_3"),
     ),
     # 5TAB preview
-    ui.nav_panel( 
+    ui.nav_panel(
         "1понуда/СУБЈЕКТ",
         ui.h2({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Набавки за ИНСТИТУЦИЈА со само 1 понуда! / Procurement for INSTITUTION with only 1 offer!"),
         ui.row(
@@ -327,11 +323,12 @@ def server(input, output, session):
         filtered_df.ContractPrice = filtered_df.ContractPrice.apply(int)
         #filtered_df.loc[:, "ContractPrice"] = filtered_df["ContractPrice"].map('{:,}'.format)
         
-        # filter by chosen columns
+        # filter away chosen columns
         list_1 = list(input.checkbox_columns())
         formatted_data = {item: item for item in list_1}
         keys = list(formatted_data.keys())
-        filtered_df = filtered_df[keys]
+        filtered_df = filtered_df.drop(columns=keys)
+        #filtered_df = filtered_df[keys]
         
         return filtered_df
     
