@@ -10,7 +10,7 @@ from shiny import App, render, ui, reactive, req, ui
 
 #df = pd.read_excel('ContractsALL.xlsx')
 
-with open("/workspaces/InnovativeLab/Contracts.csv", 'rb') as f:
+with open("D:\\test\\InnovativeLab\\Contracts.csv", 'rb') as f:
     bom = f.read(2)
 
 if bom == b'\xff\xfe':
@@ -20,7 +20,7 @@ elif bom == b'\xfe\xff':
 else:
     print('File does not have a BOM, so the version of UTF-16 is unknown')
 
-with open("/workspaces/InnovativeLab/Contracts.csv", 'rb') as f:
+with open("D:\\test\\InnovativeLab\\Contracts.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
@@ -52,7 +52,7 @@ my_dict1 = {k: v for k, v in zip(keys1, values1)}
 #PREVIEW
 app_ui = ui.page_navbar(
     shinyswatch.theme.lumen(),
-    # 1TAB preview
+
     ui.nav_panel(
     ui.output_image("image", height = "60%"),
     ui.tags.h2("ДОБРОДОЈДОВТЕ! / WELCOME!", align = "center", style="background-color:powderblue; margin-top: 80px;"), 
@@ -71,7 +71,6 @@ app_ui = ui.page_navbar(
             ),
         ),
     ),
-    # 2TAB preview
     ui.nav_panel(
         "Дата за експорт/СУБЈЕКТ",
         ui.h2({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Експортирање податоци за субјект! / Export data for the subject!"),
@@ -100,7 +99,6 @@ app_ui = ui.page_navbar(
         ui.output_data_frame("df_1"),
 
     ),
-    # 3TAB preview
     ui.nav_panel(
         "Визуелизација/СУБЈЕКТ",
         ui.h2({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Визуелизација на набавките по СУБЈЕКТ! / Visualization of procurement SUBJECT!"),
@@ -117,7 +115,7 @@ app_ui = ui.page_navbar(
         #ui.output_text('company1'),
                 ui.column(
                 6,
-                ui.input_numeric("numeric", "Максимален износ на договор / Max amount of Contract Value", 10000000, min=300000, max=10000000000, width="500px"), 
+                ui.input_numeric("numeric", "Максимален износ на договор / Max amount of Contract Value", 10000000, min=300000, max=1000000000, width="500px"), 
                 ui.output_text_verbatim("value_n"),
                 ),
             ),
@@ -128,7 +126,6 @@ app_ui = ui.page_navbar(
         ui.tags.h5("Подредена табела по вредност на јавните набавки / Arranged table by value of public procurement"), 
         ui.output_data_frame("df_2"),
     ),
-    # 4TAB preview
     ui.nav_panel(
         "Дата/ДОБАВУВАЧ",
         ui.h2({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Анализа на податоци по ДОБАВУВАЧ / CONTRACTOR data analysis"),
@@ -151,14 +148,9 @@ app_ui = ui.page_navbar(
                     #ui.output_data_frame("df_1"),
                 ),
             ),
-            ui.row(
-            ui.column(3),
-            ui.column(8, ui.download_button("downloadData1", "DOWNLOAD", width="800px", class_="btn-primary")),
-            ),
         ui.tags.h5("Подредена табела по вредност на јавните набавки / Arranged table by value of public procurement:"), 
         ui.output_data_frame("df_3"),
     ),
-    # 5TAB preview
     ui.nav_panel(
         "1понуда/СУБЈЕКТ",
         ui.h2({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Набавки за ИНСТИТУЦИЈА со само 1 понуда! / Procurement for INSTITUTION with only 1 offer!"),
@@ -184,7 +176,6 @@ app_ui = ui.page_navbar(
         ui.tags.h5("Подредена табела по вредност на јавните набавки / Arranged table by value of public procurement:"), 
         ui.output_data_frame("df_5"),
     ),
-    # 6TAB preview
     ui.nav_panel(
         "1понуда/ДОБАВУВАЧ",
         ui.h2({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Набавки од ДОБАВУВАЧ со само 1 понуда! / Contractor procurement with only 1 offer!"),
@@ -202,27 +193,23 @@ app_ui = ui.page_navbar(
         ui.tags.h5("Подредена табела по вредност на јавните набавки / Arranged table by value of public procurement:"), 
         ui.output_data_frame("df_6"),
     ),
-    # 7TAB preview
-    ui.nav_panel(
+        ui.nav_panel(
         "ТОПлиста/ВРЕДНОСТ",
         ui.h3({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Топ 10.000 најголеми набавки по вредност! / Top 10,000 largest procurements by value! "),
         ui.output_data_frame("df_8"),
     ),
-    # 8TAB preview
     ui.nav_panel(
         "ТОПлиста/Бр.на ДОГОВОРИ",
         ui.h3({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Подредена листа по број на добиени набавки! / Arranged list by number of procurements received!"),
         ui.output_data_frame("df_9"),
     ),
-    # 9TAB preview
-    ui.nav_panel(
+        ui.nav_panel(
         "ФИЛТЕР",
         ui.h3({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Филтрирање на податоци / Data filtering"),
         ui.output_data_frame("df_f"),
         ui.output_text_verbatim("txt1"),
     ),
-    # 10TAB preview
-    ui.nav_panel(
+        ui.nav_panel(
         "ТОПлиста/Вкупно пари",
         ui.h3({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, "Подредена листа по вкупно добиени пари! / Arranged list by amount of money of procurements received!"),
         ui.output_data_frame("df_7"),
@@ -310,6 +297,8 @@ def server(input, output, session):
         # remmoving decimal places and remove decimal point
         filtered_df['ContractPrice'].astype(float).astype(int)
         filtered_df.ContractPrice = filtered_df.ContractPrice.apply(int)
+        filtered_df["ContractPrice"] = filtered_df["ContractPrice"].map("{:,.0f}K".format)
+
         #filtered_df.loc[:, "ContractPrice"] = filtered_df["ContractPrice"].map('{:,}'.format)
         return filtered_df
     
@@ -329,26 +318,16 @@ def server(input, output, session):
         #df_export = df_export.encode(encoding = 'UTF-8', errors = 'strict')
         #df_export.sort_values(by='ContractPrice')
         return df_export
-    @reactive.Calc
-    def export1():
-        #df = filter_3()
-        df_export1 = filter_3()
-        #df_export1 = df[['ProcessNumber','Subject','ProcurementName', 'ProcedureName','OfferTypeName','UseElectronicTools', 'ContractDate','ContractNumber','NumberOfOffers', 'VendorName', 'EstimatedPrice', 'ContractPriceWithoutVat','Vat', 'ContractPrice']]
-        #df_export1.sort_values(by='ContractPrice')
-        return df_export1
+
     
     #@session.download(
     @render.download(
         filename=lambda: f"ZaObrazec_JN_new.csv")
     def downloadData():
         df = export()
-        yield df.to_csv(sep= ';', encoding= 'UTF-8') 
-    #df.to_string(index=False)
-    @render.download(
-        filename=lambda: f"JN_new.csv")
-    def downloadData1():
-        df = export1()
-        yield df.to_csv(sep= ';', encoding= 'UTF-8')
+        yield df.to_csv(sep= ';', encoding= 'UTF-8') #df.to_string(index=False)
+          
+
     ### plots ###
 
     @reactive.Calc
@@ -492,6 +471,7 @@ def server(input, output, session):
         #df_10 = pd.DataFrame(df)
         #df_10 = df_10[["ContractingInstitutionName", "Subject", "ContractDate" , "ContractNumber" , "VendorName" , "ContractPrice"]]
         #return df_10
+ 
 
     @output
     @render.data_frame
