@@ -10,7 +10,7 @@ from shiny import App, render, ui, reactive, req, ui
 
 #df = pd.read_excel('ContractsALL.xlsx')
 
-with open("/workspaces/InnovativeLab/Contracts.csv", 'rb') as f:
+with open("/Users/anita-catrin/Documents/SAO/InnovativeLab/Contracts.csv", 'rb') as f:
     bom = f.read(2)
 
 if bom == b'\xff\xfe':
@@ -20,12 +20,11 @@ elif bom == b'\xfe\xff':
 else:
     print('File does not have a BOM, so the version of UTF-16 is unknown')
 
-with open("/workspaces/InnovativeLab/Contracts.csv", 'rb') as f:
+with open("/Users/anita-catrin/Documents/SAO/InnovativeLab/Contracts.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
 df = pd.read_csv(io.StringIO(decoded_data), sep=';')
-
 
 #df['ContractPrice '] = df['ContractPrice'].astype(float).astype(int)
 #df['ContractPrice'] = df['ContractPrice'].astype(str).replace('\.\d+', '', regex=True).astype(int)
@@ -48,6 +47,10 @@ entity1 = df["VendorName"].unique()
 keys1 = entity1
 values1 = entity1
 my_dict1 = {k: v for k, v in zip(keys1, values1)}
+
+# creating dict for drop-down checkbox_columns
+col_names = df.columns
+formatted_data = {item: item for item in col_names}
 
 #PREVIEW
 app_ui = ui.page_navbar(
@@ -91,6 +94,11 @@ app_ui = ui.page_navbar(
             6,
             ui.input_date_range("daterange", " Одберете го периодот / Select the period:", start="2020-01-01" , width="450px"),
             ),
+            ui.input_checkbox_group(  
+                "checkbox_columns",  
+                "Select columns to remove:",  
+                formatted_data, 
+                ),
         ),
         ui.row(
             ui.column(3),
@@ -289,6 +297,9 @@ def server(input, output, session):
     def txt():
         return f"Од вкупно: {len(df[df['VendorName'] == input.selectize_for11()])} јавни набавка/и, има {len(df_111[df_111['VendorName'] == input.selectize_for11()])} со само 1 понуда/и.     From all: {len(df[df['VendorName'] == input.selectize_for11()])} public procurements, there are {len(df_111[df_111['VendorName'] == input.selectize_for11()])} with only 1 offer. "
     
+    @render.text
+    def value():
+        return ", ".join(input.checkbox_group())
 #filter().dtypes
 
     @reactive.Calc
@@ -311,6 +322,14 @@ def server(input, output, session):
         filtered_df['ContractPrice'].astype(float).astype(int)
         filtered_df.ContractPrice = filtered_df.ContractPrice.apply(int)
         #filtered_df.loc[:, "ContractPrice"] = filtered_df["ContractPrice"].map('{:,}'.format)
+        
+        # filter away chosen columns
+        list_1 = list(input.checkbox_columns())
+        formatted_data = {item: item for item in list_1}
+        keys = list(formatted_data.keys())
+        filtered_df = filtered_df.drop(columns=keys)
+        #filtered_df = filtered_df[keys]
+        
         return filtered_df
     
     @output
@@ -324,8 +343,7 @@ def server(input, output, session):
     @reactive.Calc
     def export():
         df = filter()
-        df_export = df[['ProcessNumber','Subject','ProcurementName', 'ProcedureName','OfferTypeName','UseElectronicTools', 'ContractDate','ContractNumber','NumberOfOffers', 'VendorName', 'EstimatedPrice', 'ContractPriceWithoutVat','Vat', 'ContractPrice']]
-
+        df_export = df
         #df_export = df_export.encode(encoding = 'UTF-8', errors = 'strict')
         #df_export.sort_values(by='ContractPrice')
         return df_export
@@ -493,6 +511,7 @@ def server(input, output, session):
         #df_10 = df_10[["ContractingInstitutionName", "Subject", "ContractDate" , "ContractNumber" , "VendorName" , "ContractPrice"]]
         #return df_10
 
+
     @output
     @render.data_frame
     def df_3():
@@ -547,6 +566,7 @@ def server(input, output, session):
             width="100%",
            filters=True,
         )
+
 
 
 # Export the DataFrame to an Excel file
