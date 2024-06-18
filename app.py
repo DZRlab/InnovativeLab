@@ -10,7 +10,7 @@ from shiny import App, render, ui, reactive, req, ui
 
 #df = pd.read_excel('ContractsALL.xlsx')
 
-with open("/Users/anita-catrin/Documents/SAO/InnovativeLab/Contracts.csv", 'rb') as f:
+with open("/workspaces/InnovativeLab/Contracts.csv", 'rb') as f:
     bom = f.read(2)
 
 if bom == b'\xff\xfe':
@@ -20,7 +20,7 @@ elif bom == b'\xfe\xff':
 else:
     print('File does not have a BOM, so the version of UTF-16 is unknown')
 
-with open("/Users/anita-catrin/Documents/SAO/InnovativeLab/Contracts.csv", 'rb') as f:
+with open("/workspaces/InnovativeLab/Contracts.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
@@ -360,7 +360,14 @@ def server(input, output, session):
         filename=lambda: f"ZaObrazec_JN_new.csv")
     def downloadData():
         df = export()
-        yield df.to_csv(sep= ';', encoding= 'UTF-8') 
+        yield df.to_csv(sep= ';', encoding= 'UTF-8')
+        #output = io.BytesIO()
+        #with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        #    df.to_excel(writer, index=False)
+        #output.seek(0)
+        #yield output.read()
+        #yield df.to_csv(sep= ';', encoding= 'UTF-8') 
+        #yield df.to_excel(index=False)
     #df.to_string(index=False)
     @render.download(
         filename=lambda: f"JN_new.csv")
