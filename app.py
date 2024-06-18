@@ -357,14 +357,15 @@ def server(input, output, session):
     
     #@session.download(
     @render.download(
-        filename=lambda: f"ZaObrazec_JN_new.xlsx")
+        filename=lambda: f"ZaObrazec_JN_new.csv")
     def downloadData():
         df = export()
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False)
-        output.seek(0)
-        yield output.read()
+        yield df.to_csv(sep= ';', encoding= 'UTF-8')
+        #output = io.BytesIO()
+        #with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+        #    df.to_excel(writer, index=False)
+        #output.seek(0)
+        #yield output.read()
         #yield df.to_csv(sep= ';', encoding= 'UTF-8') 
         #yield df.to_excel(index=False)
     #df.to_string(index=False)
