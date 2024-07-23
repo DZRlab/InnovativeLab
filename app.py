@@ -478,12 +478,16 @@ def server(input, output, session):
         #df_export1.sort_values(by='ContractPrice')
         return df_export1
     
-    #@session.download(
     @render.download(
-        filename=lambda: f"ZaObrazec_JN_new.csv")
+        filename=lambda: f"ZaObrazec_JN_new.xlsx")
     def downloadData():
         df = export()
-        yield df.to_csv(sep= ';', encoding= 'UTF-8') 
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Sheet1')
+        output.seek(0)
+        return output.read(), "export.xlsx"
+        #yield df.to_csv(sep= ';', encoding= 'UTF-8') 
         #df.to_string(index=False)
           
     @render.download(
