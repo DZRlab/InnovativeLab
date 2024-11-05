@@ -10,7 +10,7 @@ from shiny import App, render, ui, reactive, req, ui
 
 #df = pd.read_excel('ContractsALL.xlsx')
 
-with open("D:\\test\\InnovativeLab\\ContractsSMALL.csv", 'rb') as f:
+with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
     bom = f.read(2)
 
 if bom == b'\xff\xfe':
@@ -20,7 +20,7 @@ elif bom == b'\xfe\xff':
 else:
     print('File does not have a BOM, so the version of UTF-16 is unknown')
 
-with open("D:\\test\\InnovativeLab\\ContractsSMALL.csv", 'rb') as f:
+with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
@@ -34,6 +34,8 @@ df_11 = df.copy()
 df_111 = df_11[df_11['NumberOfOffers'] == 1]
 df_10 = df.copy()
 df_10 = df_10[["ProcessNumber","ContractingInstitutionName", "Subject", "ContractDate" , "ContractNumber" , "VendorName" , "ContractPrice"]]
+
+df_filtered=df_11[["ProcessNumber","ContractingInstitutionName","Subject","ContractDate","ContractNumber","VendorName","ContractPrice"]]
 
 #df.to_csv('Contracts_decoded.csv', encoding='utf-8', sep = ';')
 
@@ -52,6 +54,14 @@ my_dict1 = {k: v for k, v in zip(keys1, values1)}
 df_i = df_11.ContractingInstitutionName.unique()
 df_v = df_11.VendorName.unique()
 
+# List of columns to exclude
+exclude_cols = ['ProcessNumber','Subject','ProcurementName','ProcedureName','OfferTypeName','UseElectronicTools','ContractDate','ContractNumber','NumberOfOffers','VendorName','EstimatedPrice','ContarctPriceWithoutVat','Vat','ContractPrice']
+
+
+# creating dict for drop-down checkbox_columns
+col_names = df.columns
+formatted_data = {item: item for item in col_names if item not in exclude_cols}
+
 #PREVIEW
 app_ui = ui.page_navbar(
     shinyswatch.theme.lumen(),
@@ -66,7 +76,7 @@ app_ui = ui.page_navbar(
         ui.row(
         ui.card(  
             ui.card_header("ИЗВОР НА ПОДАТОЦИТЕ"),
-            ui.p("Податоците во оваа апликација се превземени од Електронскиот систем за јавни набавки - ЕСЈН во делот на склучени договори објавени во системот во период 01.01.2020 до 30.06.2024"),
+            ui.p("Податоците во оваа апликација се превземени од Електронскиот систем за јавни набавки - ЕСЈН во делот на склучени договори објавени во системот во период 01.01.2021 до 30.06.2024"),
             ),
         ui.card(
             ui.card_header("СТАТИСТИЧКИ ПОДАТОЦИ"),
@@ -106,24 +116,35 @@ app_ui = ui.page_navbar(
         ui.output_image("image3", height="50%"),
         ui.row(
             ui.column(
-            6,        
-            ui.input_selectize(
+            6,
+            ui.tooltip(    
+                ui.input_selectize(
                 "selectize", 
                 "Одбери СУБЈЕКТ:",
                 my_dict,
                 multiple=False,
                 width="600px"
                 ),
+            "Кликнете, избришете го постоечкиот избор и потоа одберете или внесете го субјектот",
+            #id="btn_tooltip",
+             ),
             ui.output_text("company"),
             ),
             ui.column(
             6,
             ui.input_date_range("daterange", " ПЕРИОД:", start="2020-01-01" , width="450px"),
             ),
+            ui.input_checkbox_group(  
+                "checkbox_columns",  
+                "ОТСТРАНЕТЕ ГИ КОЛОНИТЕ КОИ НЕ СЕ РЕЛЕВАНТНИ ЗА ВАШЕТО ПОЛЕ НА ИНТЕРЕС СО СЕЛЕКТИРАЊЕ НА КВАДРАТЧЕТО ПОКРАЈ НАЗИВОТ НА КОЛОНАТА:",  
+                formatted_data,
+                inline=True,
+                width="100%"
+                ),
         ),
         ui.row(
             ui.column(3),
-            ui.column(8, ui.download_button("downloadData", "Превземи податоци", width="800px", class_="btn-primary")),
+            ui.column(8, ui.download_button("downloadData", "Преземи податоци за ОБРАЗЕЦ ЈНПР и ЈНПП", width="800px", class_="btn-primary")),
         ),
         #ui.tags.h2({"style":" margin-top: 20px;"}), 
         ui.output_data_frame("df_1"),
@@ -137,17 +158,21 @@ app_ui = ui.page_navbar(
             ui.row(
                 ui.column(
                 6,
+                ui.tooltip(
                     ui.input_selectize(
                     "selectize_for_plot",
                     "Одбери СУБЈЕКТ:",
                     my_dict, multiple=False, 
                     width="600px"
                     ),
+                "Кликнете, избришете го постоечкиот избор и потоа одберете или внесете го субјектот",
+                #id="btn_tooltip",
+                ),
                 ),
         #ui.output_text('company1'),
                 ui.column(
                 6,
-                ui.input_numeric("numeric", "Одбери најголема вредост", 10000000, min=300000, max=1000000000, width="500px"), 
+                ui.input_numeric("numeric", "Внеси ја максималната вредност на ЈН", 10000000, min=300000, max=1000000000, width="500px"), 
                 ui.output_text_verbatim("value_n"),
                 ),
             ),
@@ -166,6 +191,7 @@ app_ui = ui.page_navbar(
             ui.row(
                 ui.column(
                 6,
+                ui.tooltip(
                     ui.input_selectize(
                     "selectize_for",
                     "Одбери НОСИТЕЛ на набавка", 
@@ -174,6 +200,8 @@ app_ui = ui.page_navbar(
                      multiple=False,
                      width="600px"
                     ),
+                "Кликнете, избришете го постоечкиот избор и потоа одберете или внесете го субјектот",
+                ),
                 ),
                 #ui.output_text('subject'),
                 ui.column(
@@ -184,7 +212,7 @@ app_ui = ui.page_navbar(
             ),
         ui.row(
         ui.column(3),
-        ui.column(8, ui.download_button("downloadData1", "Превземи податоци", width="800px", class_="btn-primary")),
+        ui.column(8, ui.download_button("downloadData1", "Преземи податоци", width="800px", class_="btn-primary")),
         ),
         ui.tags.h5("Подредена табела по вредност на јавните набавки :"), 
         ui.output_data_frame("df_3"),
@@ -197,6 +225,7 @@ app_ui = ui.page_navbar(
         ui.row(
                 ui.column(
                 6,
+                ui.tooltip(
                 ui.input_selectize(
                     "selectize_for1",
                     "Одбери СУБЈЕКТ:", 
@@ -205,13 +234,15 @@ app_ui = ui.page_navbar(
                     multiple=False,
                     width="600px"
                     ),
+                "Кликнете, избришете го постоечкиот избор и потоа одберете или внесете го субјектот",
+                ),
                 ),
                 ui.column(
                 6,
                 ui.tags.h4({"style": "text-align: center;background-color:darkgoldenrod; margin-top: 35px;"},""),
                 ui.tags.h4({"style": "background-color:Goldenrod; color:white;"},"Од " + str(len(df)) + " јавни набавки, " + str(len(df_111)) + " се со само 1 понуда."),
-                                ),
-        ),
+                    ),
+            ),
         ui.output_plot("plot1", height='400px', fill=False),     
         ui.tags.h5("Подредена табела по вредност на јавните набавки"), 
         ui.output_data_frame("df_5"),
@@ -219,8 +250,9 @@ app_ui = ui.page_navbar(
 # 6TAB preview
     ui.nav_panel(
         "Договори со 1 понуда по Носител на набавка",
-            ui.h2({"style=color:red": "text-align: center; background-color:Goldenrod; margin-top: 80px;"}, "Набавки од ДОБАВУВАЧ со само 1 понуда!"),
+            ui.h2({"style": "text-align: center;background-color:darkgoldenrod; margin-top: 80px;"}, ""),
             ui.output_image("image7", height="50%"),
+            ui.tooltip(
             ui.input_selectize(
             "selectize_for11",
             "Одбери НОСИТЕЛ НА НАБАВКА:", 
@@ -228,6 +260,8 @@ app_ui = ui.page_navbar(
             selected=None,
             multiple=False,
             width="600px"
+            ),
+            "Кликнете, избришете го постоечкиот избор и потоа одберете или внесете го субјектот",
             ),
         
         ui.column (12,
@@ -242,7 +276,7 @@ app_ui = ui.page_navbar(
         "Пребарување по критериуми",
         ui.h3({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, ""),
         ui.output_image("imagekr", height="50%"),
-        ui.output_data_frame("df_f"),
+        ui.output_data_frame("df_filter"),
         ui.output_text_verbatim("txt1"),
     ),
 # 8TAB preview
@@ -292,12 +326,12 @@ https://www.e-nabavki.gov.mk/PublicAccess/home.aspx#/contracts/0
 
 **Статистика** – Статистички податоци за набавки со најголеми износи, наголем број на склучени договори по носител на набавка, најголеми износи на склучени договори по договорен орган.  
 
-**Упатств**о – Објаснување за користење на апликацијата.  
+**Упатство** – Објаснување за користење на апликацијата.  
 
 
-
-Откако ќе ги селектирате сите колони за кои сакате да ги преземете податоците, стартувајте го копчето преземи.
-Податоците ќе се снимат во колоната Downloads  и за да можете да  ги користите , потребно е да ги вчитате во Еxcel при што ќе пристапите до папката и со помош на Get Data from Text/CSV ќе ги вчитате во нов документ.
+Откако ќе ги селектирате сите колони за кои сакате да ги преземете податоците, стартувајте го копчето **`ПРЕЗЕМИ`**.
+Податоците ќе се снимат pod име JN_SUBJEKT.xlsx во папката Downloads и за да можете да ги користите, потребно е да ги вчитате во Еxcel и притоа во процесот на вчитување ќе треба да потврдите дека податоците се од доверлив извор.
+На ист начин се снимаат и користат преземените податоци кои се однесуваат за Носител на Јавната набавка: JN_NOSITEL.xlsx.
 
 
 ```
@@ -417,6 +451,9 @@ def server(input, output, session):
     def txt():
         return f"Од вкупно: {len(df[df['VendorName'] == input.selectize_for11()])} јавни набавка/и, има {len(df_111[df_111['VendorName'] == input.selectize_for11()])} со само 1 понуда/и."
     
+    @render.text
+    def value():
+        return ", ".join(input.checkbox_group())
 #filter().dtypes
 
     @reactive.Calc
@@ -446,15 +483,24 @@ def server(input, output, session):
         ##filtered_df[['EstimatedPrice', 'ContractPriceWithoutVat', 'ContractPrice']] = filtered_df[['EstimatedPrice', 'ContractPriceWithoutVat', 'ContractPrice']].apply(int)        #filtered_df["EstimatedPrice"] = filtered_df["EstimatedPrice"].map("{:,.0f}".format)
         #filtered_df["ContractPriceWithoutVat"] = filtered_df["ContractPriceWithoutVat"].map("{:,.0f}".format)
         #filtered_df["ContractPrice"] = filtered_df["ContractPrice"].map("{:,.0f}".format)
-     #   filtered_df[["EstimatedPrice","ContractPriceWithoutVat","ContractPrice"]] = filtered_df[["EstimatedPrice","ContractPriceWithoutVat","ContractPrice"]].map("{:,.0f}".format)
+        #filtered_df[["EstimatedPrice","ContractPriceWithoutVat","ContractPrice"]] = filtered_df[["EstimatedPrice","ContractPriceWithoutVat","ContractPrice"]].map("{:,.0f}".format)
         
         #filtered_df['ContractPrice'].astype(int).astype(float)
         #filtered_df["ContractPrice"] = filtered_df["ContractPrice"].astype(float)
         #filtered_df["ContractPrice"] = filtered_df["ContractPrice"].apply(lambda x: str(x).replace(",", "."))
                 
         #filtered_df.loc[:, "ContractPrice"] = filtered_df["ContractPrice"].map('{:,}'.format)
-        return filtered_df
+        #return filtered_df.sort_values(by='ContractPrice', ascending=False)
+        #return filtered_df
     
+        # filter away chosen columns
+        list_1 = list(input.checkbox_columns())
+        formatted_data = {item: item for item in list_1}
+        keys = list(formatted_data.keys())
+        filtered_df = filtered_df.drop(columns=keys)
+        #filtered_df = filtered_df[keys]
+        return filtered_df.sort_values(by='ContractPrice', ascending=False)
+
     @output
     @render.data_frame
     def df_1():
@@ -467,6 +513,38 @@ def server(input, output, session):
     def export():
         df = filter()
         df_export = df[['ProcessNumber','Subject','ProcurementName', 'ProcedureName','OfferTypeName','UseElectronicTools', 'ContractDate','ContractNumber','NumberOfOffers', 'VendorName', 'EstimatedPrice', 'ContractPriceWithoutVat','Vat', 'ContractPrice']]
+        
+        # Insert empty columns
+        df_export['IzvorNaSredstva'] = 'XXX' 
+        df_export['A'] = 'XXX'
+        df_export['ID'] = range(1, len(df_export) + 1) 
+        #df_export=df_export()
+
+        # List of columns in the desired order
+        df_export = df_export[['ID','A','A','A','A','EstimatedPrice', 'IzvorNaSredstva', 'OfferTypeName','UseElectronicTools','ProcedureName','Subject','ContractNumber','ContractDate','ProcurementName','VendorName','ContractPriceWithoutVat']]
+        #new_order = ['ProcessNumber', 'EstimatedPrice', 'Vat', 'OfferTypeName','UseElectronicTools','ProcedureName','Subject','ContractDate','ContractNumber','ProcurementName','VendorName','ContractPriceWithoutVat','ContractPrice','NumberOfOffers']
+
+        # Reorder the DataFrame columns
+        #df_export = df[new_order]
+
+
+        # Dictionary of old column names and their new names
+        #new_column_names = {
+        #    'Subject': 'Предмет_на_договорот_за_ЈН',
+        #    'ProcurementName': 'Вид_на_договор_за_ЈН',
+        #    'ProcedureName': 'Вид_на_постапка_за_ЈН',
+        #    'OfferTypeName': 'Начин_за_доделување_на_договор_за_ЈН',
+        #    'UseElectronicTools': 'Постапка_за_доделување_на_договор_за_ЈН',
+        #    'ContractDate': 'Датум на Договор_за ЈН',
+        #    'ContractNumber': 'Број_на_Договор_за_ЈН',
+        #    'VendorName': 'Назив_на_носителот_на_набавката',
+        #    'EstimatedPrice': 'Вредност_на_ЈН',
+        #    'ContractPriceWithoutVat': 'Вредност_на_договорот_за_ЈН_без_ДДВ',
+        #    }
+
+        # Rename the columns
+        #df_export = df_export.rename(columns=new_column_names)
+
         #df_export.sort_values(by='ContractPrice')
         return df_export
     
@@ -480,17 +558,29 @@ def server(input, output, session):
     
     #@session.download(
     @render.download(
-        filename=lambda: f"ZaObrazec_JN_new.csv")
+        filename=lambda: f"JN_SUBJEKT.xlsx")
+        #filename=lambda: f"ZaObrazec_JN_new.csv")
     def downloadData():
         df = export()
-        yield df.to_csv(sep= ';', encoding= 'UTF-8') 
-        #df.to_string(index=False)
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Sheet1')
+        output.seek(0)
+        return output.read(), "export.xlsx"
+        #yield df.to_csv(sep= ';', encoding= 'UTF-8') 
+        ##df.to_string(index=False)
           
     @render.download(
-        filename=lambda: f"JN_new.csv")
+        filename=lambda: f"JN_NOSITEL.xlsx")
+        #filename=lambda: f"JN_po_nositel.csv")
     def downloadData1():
         df = export1()
-        yield df.to_csv(sep= ';', encoding= 'UTF-8') 
+        output = io.BytesIO()
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            df.to_excel(writer, index=False, sheet_name='Sheet1')
+        output.seek(0)
+        return output.read(), "export.xlsx"
+        #yield df.to_csv(sep= ';', encoding= 'UTF-8') 
 
 
     ### plots ###
@@ -695,10 +785,10 @@ def server(input, output, session):
         )
     
     @render.data_frame
-    def df_f():
+    def df_filter():
         
         return render.DataTable(
-            df_10,
+            df_filtered,
             row_selection_mode='multiple',
             width="100%",
            filters=True,
