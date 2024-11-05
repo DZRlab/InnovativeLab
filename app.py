@@ -515,13 +515,13 @@ def server(input, output, session):
         df_export = df[['ProcessNumber','Subject','ProcurementName', 'ProcedureName','OfferTypeName','UseElectronicTools', 'ContractDate','ContractNumber','NumberOfOffers', 'VendorName', 'EstimatedPrice', 'ContractPriceWithoutVat','Vat', 'ContractPrice']]
         
         # Insert empty columns
-        df_export['IzvorNaSredstva'] = 'XXX' 
-        df_export['A'] = 'XXX'
+        df_export['IzvorNaSredstva'] = 'NULL'  
+        df_export['A'] = ''
         df_export['ID'] = range(1, len(df_export) + 1) 
         #df_export=df_export()
 
         # List of columns in the desired order
-        df_export = df_export[['ID','A','A','A','A','EstimatedPrice', 'IzvorNaSredstva', 'OfferTypeName','UseElectronicTools','ProcedureName','Subject','ContractNumber','ContractDate','ProcurementName','VendorName','ContractPriceWithoutVat']]
+        df_export = df_export[['ID','A','A','A','A','EstimatedPrice', 'A', 'OfferTypeName','UseElectronicTools','ProcedureName','Subject','ContractNumber','ContractDate','ProcurementName','VendorName','ContractPriceWithoutVat']]
         #new_order = ['ProcessNumber', 'EstimatedPrice', 'Vat', 'OfferTypeName','UseElectronicTools','ProcedureName','Subject','ContractDate','ContractNumber','ProcurementName','VendorName','ContractPriceWithoutVat','ContractPrice','NumberOfOffers']
 
         # Reorder the DataFrame columns
