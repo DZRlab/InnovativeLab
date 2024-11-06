@@ -10,7 +10,8 @@ from shiny import App, render, ui, reactive, req, ui
 
 #df = pd.read_excel('ContractsALL.xlsx')
 
-with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
+# D:\\test\InnovativeLab\ContractsSMALL.csv
+with open("InnovativeLab/ContractsSMALL.csv", 'rb') as f:
     bom = f.read(2)
 
 if bom == b'\xff\xfe':
@@ -20,22 +21,23 @@ elif bom == b'\xfe\xff':
 else:
     print('File does not have a BOM, so the version of UTF-16 is unknown')
 
-with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
+with open("InnovativeLab/ContractsSMALL.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
+# D:\\test\InnovativeLab\ContractsSMALL.csv
 df = pd.read_csv(io.StringIO(decoded_data), sep=';')
-
-
-#df['ContractPrice '] = df['ContractPrice'].astype(float).astype(int)
-#df['ContractPrice'] = df['ContractPrice'].astype(str).replace('\.\d+', '', regex=True).astype(int)
 
 df_11 = df.copy()
 df_111 = df_11[df_11['NumberOfOffers'] == 1]
 df_10 = df.copy()
-df_10 = df_10[["ProcessNumber","ContractingInstitutionName", "Subject", "ContractDate" , "ContractNumber" , "VendorName" , "ContractPrice"]]
+df_10 = df_10[["ProcessNumber","ContractingInstitutionName", "Subject",
+                "ContractDate" , "ContractNumber" , "VendorName" , 
+                "ContractPrice"]]
 
-df_filtered=df_11[["ProcessNumber","ContractingInstitutionName","Subject","ContractDate","ContractNumber","VendorName","ContractPrice"]]
+df_filtered=df_11[["ProcessNumber","ContractingInstitutionName",
+                   "Subject","ContractDate","ContractNumber",
+                   "VendorName","ContractPrice"]]
 
 #df.to_csv('Contracts_decoded.csv', encoding='utf-8', sep = ';')
 
@@ -55,8 +57,11 @@ df_i = df_11.ContractingInstitutionName.unique()
 df_v = df_11.VendorName.unique()
 
 # List of columns to exclude
-exclude_cols = ['ProcessNumber','Subject','ProcurementName','ProcedureName','OfferTypeName','UseElectronicTools','ContractDate','ContractNumber','NumberOfOffers','VendorName','EstimatedPrice','ContarctPriceWithoutVat','Vat','ContractPrice']
-
+exclude_cols = ['ProcessNumber','Subject','ProcurementName',
+                'ProcedureName','OfferTypeName','UseElectronicTools',
+                'ContractDate','ContractNumber','NumberOfOffers',
+                'VendorName','EstimatedPrice','ContarctPriceWithoutVat',
+                'Vat','ContractPrice']
 
 # creating dict for drop-down checkbox_columns
 col_names = df.columns
@@ -66,10 +71,8 @@ formatted_data = {item: item for item in col_names if item not in exclude_cols}
 app_ui = ui.page_navbar(
     shinyswatch.theme.lumen(),
 # 1TAB preview
-
     ui.nav_panel(
     ui.output_image("image", height = "60%"),
-   #ui.tags.h2("ПОДАТОЦИ ЗА СКЛУЧЕНИ ДОГОВОРИ ЗА ЈАВНИ НАБАВКИ", align = "center", style="background-color:darkgoldenrod; margin-top: 80px;"), 
         ui.row(
             ui.output_image("image2"), style="text-align: center;",
         ),
@@ -90,7 +93,6 @@ app_ui = ui.page_navbar(
                 ui.p(str(len(df_i)), style="background-color:darkgoldenrod; text-align: center; font-size:400%"),
                     ),
                 ui.card(
-                    #style="background-color:darkgoldenrod;",
                     ui.card_header("Вкупен број на носители на набавки/добавувачи"),
                     ui.p(str(len(df_v)), style="text-align: center; font-size:400%", class_="btn-primary"),
                     ),
@@ -146,7 +148,6 @@ app_ui = ui.page_navbar(
             ui.column(3),
             ui.column(8, ui.download_button("downloadData", "Преземи податоци за ОБРАЗЕЦ ЈНПР и ЈНПП", width="800px", class_="btn-primary")),
         ),
-        #ui.tags.h2({"style":" margin-top: 20px;"}), 
         ui.output_data_frame("df_1"),
 
     ),
@@ -166,10 +167,8 @@ app_ui = ui.page_navbar(
                     width="600px"
                     ),
                 "Кликнете, избришете го постоечкиот избор и потоа одберете или внесете го субјектот",
-                #id="btn_tooltip",
                 ),
                 ),
-        #ui.output_text('company1'),
                 ui.column(
                 6,
                 ui.input_numeric("numeric", "Внеси ја максималната вредност на ЈН", 10000000, min=300000, max=1000000000, width="500px"), 
@@ -203,11 +202,9 @@ app_ui = ui.page_navbar(
                 "Кликнете, избришете го постоечкиот избор и потоа одберете или внесете го субјектот",
                 ),
                 ),
-                #ui.output_text('subject'),
                 ui.column(
                 6,
-                    ui.input_date_range("daterange1", "ПЕРИОД:", start="2020-01-01" , width="450px"), 
-                    #ui.output_data_frame("df_1"),
+                    ui.input_date_range("daterange1", "ПЕРИОД:", start="2020-01-01" , width="450px"),
                 ),
             ),
         ui.row(
@@ -265,7 +262,6 @@ app_ui = ui.page_navbar(
             ),
         
         ui.column (12,
-        #ui.output_text_verbatim("txt"), style="font-size:150%",
         ui.output_text("txt"), style="color:red; font-size:180%",
         align="center"),
         ui.tags.h5("Подредена табела по вредност на јавните набавки:"), 
@@ -343,126 +339,101 @@ https://www.e-nabavki.gov.mk/PublicAccess/home.aspx#/contracts/0
 
     position = ("fixed-top"),
     bg = "#d1dae3",
-   # fluid = True
 )
 
 
 def server(input, output, session):
-
     @render.image
     def image():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "logo.png"), "width": "80px"}
         return img
-    
     @render.image
     def image2():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "dzrA.jpg"), "width": "100%"}
         return img
-    
     @render.image
     def image3():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "tab2.jpg"), "width": "100%"}
         return img
-    
     @render.image
     def image4():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "tab3.jpg"), "width": "100%"}
         return img
-    
     @render.image
     def image5():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "tab4.jpg"), "width": "100%"}
         return img
-    
     @render.image
     def image6():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "tab5.jpg"), "width": "100%"}
         return img
-    
     @render.image
     def image7():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "tab6.jpg"), "width": "100%"}
         return img
-
     @render.image
     def image8():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "tab7.jpg"), "width": "100%"}
         return img
-    
     @render.image
     def image9():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "tab8.jpg"), "width": "100%"}
         return img
-    
     @render.image
     def imagekr():
         from pathlib import Path
         dir = Path(__file__).resolve().parent
         img: ImgData = {"src": str(dir / "tabkr.jpg"), "width": "100%"}
         return img
-    
     @output
     @render.text
     def company1():
         return "You choose: " + str(input.selectize_for_plot())
-    
     @render.text
     def txt_entity():
         return entity
-    
     @render.text
     def txt_entity1():
         return entity1
-
     @render.text
     def value_n():
-        #return input.numeric()
         dali = input.numeric()
         ui.update_slider("slider", min=0, max=dali, value=[35, 1000000])
-        #return ui.update_slider("slider", "Одбери ранг на вредностa на јавните набавки", min=0, max=dali, value=[35, 1000000])
-
     @render.text
     def value():
         return  f"{input.daterange()[0]} to {input.daterange()[1]}"
-
     @render.text
     def value1():
         return  f"{input.daterange1()[0]} to {input.daterange1()[1]}"
-    
     @render.text
     def txt():
         return f"Од вкупно: {len(df[df['VendorName'] == input.selectize_for11()])} јавни набавка/и, има {len(df_111[df_111['VendorName'] == input.selectize_for11()])} со само 1 понуда/и."
-    
     @render.text
     def value():
         return ", ".join(input.checkbox_group())
-#filter().dtypes
-
     @reactive.Calc
     def filter():
         # filter 1
         df_1 = df[df['ContractingInstitutionName'] == input.selectize()]
-        #df_1 = df.copy()
         # filter 2
-        # TO DO: include more logic checks on dates (e.g. duration should be included)
         start_date = input.daterange()[0]
         end_date = input.daterange()[1]
         df_1 = pd.DataFrame(df_1)
@@ -473,34 +444,19 @@ def server(input, output, session):
         filtered_df["ContractDate"] = pd.to_datetime(filtered_df["ContractDate"]).dt.strftime("%Y-%m-%d")
 
         # remmoving decimal places and remove decimal point
-        #filtered_df['EstimatedPrice'].astype(float).astype(int)
-        #filtered_df['ContractPriceWithoutVat'].astype(float).astype(int)
-        #filtered_df['ContractPrice'].astype(float).astype(int)
         filtered_df[['EstimatedPrice','ContractPriceWithoutVat','ContractPrice']].astype(float).astype(int)
         filtered_df.EstimatedPrice = filtered_df.EstimatedPrice.apply(int)
         filtered_df.ContractPriceWithoutVat = filtered_df.ContractPriceWithoutVat.apply(int)
         filtered_df.ContractPrice = filtered_df.ContractPrice.apply(int)
-        ##filtered_df[['EstimatedPrice', 'ContractPriceWithoutVat', 'ContractPrice']] = filtered_df[['EstimatedPrice', 'ContractPriceWithoutVat', 'ContractPrice']].apply(int)        #filtered_df["EstimatedPrice"] = filtered_df["EstimatedPrice"].map("{:,.0f}".format)
-        #filtered_df["ContractPriceWithoutVat"] = filtered_df["ContractPriceWithoutVat"].map("{:,.0f}".format)
-        #filtered_df["ContractPrice"] = filtered_df["ContractPrice"].map("{:,.0f}".format)
-        #filtered_df[["EstimatedPrice","ContractPriceWithoutVat","ContractPrice"]] = filtered_df[["EstimatedPrice","ContractPriceWithoutVat","ContractPrice"]].map("{:,.0f}".format)
         
-        #filtered_df['ContractPrice'].astype(int).astype(float)
-        #filtered_df["ContractPrice"] = filtered_df["ContractPrice"].astype(float)
-        #filtered_df["ContractPrice"] = filtered_df["ContractPrice"].apply(lambda x: str(x).replace(",", "."))
-                
-        #filtered_df.loc[:, "ContractPrice"] = filtered_df["ContractPrice"].map('{:,}'.format)
-        #return filtered_df.sort_values(by='ContractPrice', ascending=False)
-        #return filtered_df
-    
         # filter away chosen columns
         list_1 = list(input.checkbox_columns())
         formatted_data = {item: item for item in list_1}
         keys = list(formatted_data.keys())
         filtered_df = filtered_df.drop(columns=keys)
-        #filtered_df = filtered_df[keys]
         return filtered_df.sort_values(by='ContractPrice', ascending=False)
 
+    #TODO; what does this do? 
     @output
     @render.data_frame
     def df_1():
@@ -518,7 +474,6 @@ def server(input, output, session):
         df_export['IzvorNaSredstva'] = 'NULL'  
         df_export['A'] = ''
         df_export['ID'] = range(1, len(df_export) + 1) 
-        #df_export=df_export()
 
         # List of columns in the desired order
         df_export = df_export[['ID','A','A','A','A','EstimatedPrice', 'A', 'OfferTypeName','UseElectronicTools','ProcedureName','Subject','ContractNumber','ContractDate','ProcurementName','VendorName','ContractPriceWithoutVat']]
@@ -526,40 +481,18 @@ def server(input, output, session):
 
         # Reorder the DataFrame columns
         #df_export = df[new_order]
-
-
-        # Dictionary of old column names and their new names
-        #new_column_names = {
-        #    'Subject': 'Предмет_на_договорот_за_ЈН',
-        #    'ProcurementName': 'Вид_на_договор_за_ЈН',
-        #    'ProcedureName': 'Вид_на_постапка_за_ЈН',
-        #    'OfferTypeName': 'Начин_за_доделување_на_договор_за_ЈН',
-        #    'UseElectronicTools': 'Постапка_за_доделување_на_договор_за_ЈН',
-        #    'ContractDate': 'Датум на Договор_за ЈН',
-        #    'ContractNumber': 'Број_на_Договор_за_ЈН',
-        #    'VendorName': 'Назив_на_носителот_на_набавката',
-        #    'EstimatedPrice': 'Вредност_на_ЈН',
-        #    'ContractPriceWithoutVat': 'Вредност_на_договорот_за_ЈН_без_ДДВ',
-        #    }
-
-        # Rename the columns
-        #df_export = df_export.rename(columns=new_column_names)
-
-        #df_export.sort_values(by='ContractPrice')
+        
         return df_export
     
     @reactive.Calc
     def export1():
         #df = filter_3()
         df_export1 = filter_3()
-        #df_export1 = df[['ProcessNumber','Subject','ProcurementName', 'ProcedureName','OfferTypeName','UseElectronicTools', 'ContractDate','ContractNumber','NumberOfOffers', 'VendorName', 'EstimatedPrice', 'ContractPriceWithoutVat','Vat', 'ContractPrice']]
-        #df_export1.sort_values(by='ContractPrice')
         return df_export1
     
     #@session.download(
     @render.download(
         filename=lambda: f"JN_SUBJEKT.xlsx")
-        #filename=lambda: f"ZaObrazec_JN_new.csv")
     def downloadData():
         df = export()
         output = io.BytesIO()
@@ -567,8 +500,6 @@ def server(input, output, session):
             df.to_excel(writer, index=False, sheet_name='Sheet1')
         output.seek(0)
         return output.read(), "export.xlsx"
-        #yield df.to_csv(sep= ';', encoding= 'UTF-8') 
-        ##df.to_string(index=False)
           
     @render.download(
         filename=lambda: f"JN_NOSITEL.xlsx")
@@ -592,25 +523,9 @@ def server(input, output, session):
         # filter 2
         min_amount = input.slider()[0]
         max_amount = input.slider()[1]
-        filtered_for_plot = pd.DataFrame(filtered_for_plot) 
-        #filtered_for_plot['ContractPrice'] = filtered_for_plot['ContractPrice'].astype(int)
+        filtered_for_plot = pd.DataFrame(filtered_for_plot)
         filtered_for_plot = filtered_for_plot[filtered_for_plot["ContractPrice"].between(min_amount, max_amount)]
-        #>= min_amount) & (filtered_for_plot["ContractDate"] <= max_amount]
-        #filtered_for_plot= filtered_for_plot[mask]
-        #filtered_df = pd.DataFrame(filtered_df)
         return filtered_for_plot.sort_values(by='ContractPrice', ascending=False)
-    
-    # OLD PLOT changed for shinyserver, matplotlib instead seaborn
-    #@render.plot(
-    #alt="Histogram"
-    #)  
-    #def plot():  
-    #    #option = (999)
-    #    df = filter_for_plot()
-    #    ax = sns.histplot(data=df, x='ContractPrice')
-    #    ax.set_xlabel("Вредност на набавката / Contract Price")
-    #    ax.set_ylabel("Број на набавки / Number of Contracts")
-    #    return ax 
 
     @render.plot(
     alt="Histogram"
@@ -628,15 +543,12 @@ def server(input, output, session):
     @render.data_frame
     def df_2():
         return render.DataGrid(
-            #df[df['ContractingInstitutionName'] == input.selectize()]
             filter_for_plot()
         )
     
     @reactive.Calc
     def filter_3():
         df_3 = df[df['VendorName'] == input.selectize_for()]
-        # filter 2
-        # TO DO: include more logic checks on dates (e.g. duration should be included)
         start_date = input.daterange1()[0]
         end_date = input.daterange1()[1]
         df_3 = pd.DataFrame(df_3)
@@ -650,22 +562,13 @@ def server(input, output, session):
         # remmoving decimal places and remove decimal point
         filtered_df3['ContractPrice'].astype(float).astype(int)
         filtered_df3.ContractPrice = filtered_df3.ContractPrice.apply(int)
-        #filtered_df["ContractPrice"] = filtered_df["ContractPrice"].map("{:,.0f}".format)
-        
+
         return filtered_df3.sort_values(by='ContractPrice', ascending=False)
-    
-    #@reactive.Calc
-    #def filter_4():
-        ##df_4 = df[df['NumberOfOffers'] == 1]
-        #df_4 = df_111[["ProcessNumber","ContractingInstitutionName","Subject","ProcurementName","AgreementStartDate","AgreementEndDate","ContractDate","ContractNumber","NumberOfOffers","VendorName","ContractPrice"]]
-        #df_4=df_4[["ProcessNumber","ContractingInstitutionName","Subject","ProcurementName","AgreementStartDate","AgreementEndDate","ContractDate","ContractNumber","NumberOfOffers","VendorName","ContractPrice"]]
-        #return df_4.sort_values(by='ContractPrice', ascending=False)
     
     @render.plot(
     alt="Histogram"
     )  
-    def plot1():  
-        #option = (999)
+    def plot1():
         df = filter_5t()
         ax = sns.histplot(data=df, x='ContractDate')
         ax.set_xlabel("Дата на договор")
@@ -699,17 +602,11 @@ def server(input, output, session):
         df_8.groupby(['VendorName'])['ContractPrice'].sum()
         df_8 = df_8.sort_values(by='ContractPrice', ascending=False)
         df_8 = df_8.head(10000)
-        #df_8.groupby(['ContractPrice']).sum()
-        ##df_8 = df_8.drop_duplicates(subset=['VendorName'])
-        ##return df_8.sort_values(by='VendorName_counts', ascending=False)
         return df_8
     
     def filter_7():
-        #df_7 = pd.DataFrame(df)
         df_7 = df[["VendorName","ContractPrice"]]
         df_7 = pd.DataFrame(df_7)
-        #df_7.groupby(["VendorName"], sort=False).sum()
-        #df_7 = df_7.groupby('VendorName')['ContractPrice'].sum()
         amount = df_7.groupby('VendorName')['ContractPrice'].sum()
         df_7['Vendor_amount'] = df_7['VendorName'].map(amount)
         df_7 = df_7[["VendorName","Vendor_amount"]]
@@ -729,11 +626,6 @@ def server(input, output, session):
         
         df_9 = df_9.drop_duplicates(subset=['VendorName'])
         return df_9.sort_values(by='VendorName_counts', ascending=False)
-    
-    #def filter_10():
-        #df_10 = pd.DataFrame(df)
-        #df_10 = df_10[["ContractingInstitutionName", "Subject", "ContractDate" , "ContractNumber" , "VendorName" , "ContractPrice"]]
-        #return df_10
  
     @output
     @render.data_frame
@@ -741,12 +633,6 @@ def server(input, output, session):
         return render.DataGrid(
         filter_3()
         )
-    
-    #@render.data_frame
-    #def df_4():
-    #    return render.DataGrid(
-    #    filter_4()  
-    #    )
     
     @render.data_frame
     def df_5():
@@ -795,16 +681,4 @@ def server(input, output, session):
         )
 
 
-# Export the DataFrame to an Excel file
-# df.to_excel('ZaObrazec_JN.xlsx', index=False)
-# df.output_data_frame("ZaObrazec_JN.xlsx")
-#@ render.data_frame
-# return render.DataGrid(data)
-
-
 app = App(app_ui, server)
-
-
-#df.loc[['ProcessNumber', 'ContractingInstitutionName']]
-#df.loc[df['NumberOfOffers'] == 1 ]
-#df.loc[(df['NumberOfOffers'] == 1 ) & (df.ProcessNumber[-1:-4] == 2022)]
