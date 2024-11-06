@@ -53,8 +53,9 @@ keys1 = entity1
 values1 = entity1
 my_dict1 = {k: v for k, v in zip(keys1, values1)}
 
-df_i = df_11.ContractingInstitutionName.unique()
-df_v = df_11.VendorName.unique()
+# reduce number of dfs by doing unique call directly where needed
+#df_i = df_11.ContractingInstitutionName.unique()
+#df_v = df_11.VendorName.unique()
 
 # List of columns to exclude
 exclude_cols = ['ProcessNumber','Subject','ProcurementName',
@@ -86,15 +87,15 @@ app_ui = ui.page_navbar(
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Вкупен број на Јавни Набавки"),
-                ui.p(str(len(df)), style="color:red; text-align: center; font-size:400%"),
+                ui.p(str(df['ProcessNumber'].nunique()), style="color:red; text-align: center; font-size:400%"),
                     ),
                 ui.card(
                     ui.card_header("Вкупен број на СУБЈЕКТИ"),
-                ui.p(str(len(df_i)), style="background-color:darkgoldenrod; text-align: center; font-size:400%"),
+                ui.p(str(df['Subject'].nunique()), style="background-color:darkgoldenrod; text-align: center; font-size:400%"),
                     ),
                 ui.card(
                     ui.card_header("Вкупен број на носители на набавки/добавувачи"),
-                    ui.p(str(len(df_v)), style="text-align: center; font-size:400%", class_="btn-primary"),
+                    ui.p(str(df['VendorName'].nunique()), style="text-align: center; font-size:400%", class_="btn-primary"),
                     ),
                 ),    
             ),
