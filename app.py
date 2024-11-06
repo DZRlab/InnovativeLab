@@ -53,10 +53,6 @@ keys1 = entity1
 values1 = entity1
 my_dict1 = {k: v for k, v in zip(keys1, values1)}
 
-# reduce number of dfs by doing unique call directly where needed
-#df_i = df_11.ContractingInstitutionName.unique()
-#df_v = df_11.VendorName.unique()
-
 # List of columns to exclude
 exclude_cols = ['ProcessNumber','Subject','ProcurementName',
                 'ProcedureName','OfferTypeName','UseElectronicTools',
@@ -135,7 +131,10 @@ app_ui = ui.page_navbar(
             ),
             ui.column(
             6,
-            ui.input_date_range("daterange", " ПЕРИОД:", start="2020-01-01" , width="450px"),
+            ui.input_date_range("daterange",
+                                " ПЕРИОД:",
+                                start="2020-01-01" ,
+                                width="450px"),
             ),
             ui.input_checkbox_group(  
                 "checkbox_columns",  
@@ -147,7 +146,10 @@ app_ui = ui.page_navbar(
         ),
         ui.row(
             ui.column(3),
-            ui.column(8, ui.download_button("downloadData", "Преземи податоци за ОБРАЗЕЦ ЈНПР и ЈНПП", width="800px", class_="btn-primary")),
+            ui.column(8, ui.download_button("downloadData",
+                                            "Преземи податоци за ОБРАЗЕЦ ЈНПР и ЈНПП",
+                                            width="800px",
+                                            class_="btn-primary")),
         ),
         ui.output_data_frame("df_1"),
 
@@ -456,32 +458,30 @@ def server(input, output, session):
         keys = list(formatted_data.keys())
         filtered_df = filtered_df.drop(columns=keys)
         return filtered_df.sort_values(by='ContractPrice', ascending=False)
+        
 
-    #TODO; what does this do? 
+    #note; this applies all filters defined in filter() and saves the result in df_1
     @output
     @render.data_frame
     def df_1():
         return render.DataGrid(
-            #df[df['ContractingInstitutionName'] == input.selectize()],
             filter()
         )
     
     @reactive.Calc
     def export():
-        df = filter()
-        df_export = df[['ProcessNumber','Subject','ProcurementName', 'ProcedureName','OfferTypeName','UseElectronicTools', 'ContractDate','ContractNumber','NumberOfOffers', 'VendorName', 'EstimatedPrice', 'ContractPriceWithoutVat','Vat', 'ContractPrice']]
-        
+        df_export = filter()
+
         # Insert empty columns
+        #TODO; Try using .loc[row_indexer,col_indexer] = value instead
         df_export['IzvorNaSredstva'] = 'NULL'  
         df_export['A'] = ''
         df_export['ID'] = range(1, len(df_export) + 1) 
 
         # List of columns in the desired order
-        df_export = df_export[['ID','A','A','A','A','EstimatedPrice', 'A', 'OfferTypeName','UseElectronicTools','ProcedureName','Subject','ContractNumber','ContractDate','ProcurementName','VendorName','ContractPriceWithoutVat']]
-        #new_order = ['ProcessNumber', 'EstimatedPrice', 'Vat', 'OfferTypeName','UseElectronicTools','ProcedureName','Subject','ContractDate','ContractNumber','ProcurementName','VendorName','ContractPriceWithoutVat','ContractPrice','NumberOfOffers']
-
-        # Reorder the DataFrame columns
-        #df_export = df[new_order]
+        df_export = df_export[['ID','A','A','A','A','EstimatedPrice', 'A', 'OfferTypeName',
+                               'UseElectronicTools','ProcedureName','Subject','ContractNumber',
+                               'ContractDate','ProcurementName','VendorName']] #,'ContractPriceWithoutVat'
         
         return df_export
     
