@@ -370,10 +370,10 @@ def filter_df(df,
         df = df[df['VendorName'] == vendor_name]
     if date_range:
         start_date, end_date = date_range
-        df["ContractDate"] = pd.to_datetime(df["ContractDate"]).dt.date
+        df.loc[:, "ContractDate"] = pd.to_datetime(df["ContractDate"]).dt.date
         mask = (df["ContractDate"] >= start_date) & (df["ContractDate"] <= end_date)
         df = df[mask]
-        df["ContractDate"] = pd.to_datetime(df["ContractDate"]).dt.strftime("%Y-%m-%d")
+        df.loc[:, "ContractDate"] = pd.to_datetime(df["ContractDate"]).dt.strftime("%Y-%m-%d")
     if min_amount is not None and max_amount is not None:
         df = df[df["ContractPrice"].between(min_amount, max_amount)]
     if group_by:
@@ -591,7 +591,7 @@ def server(input, output, session):
         counts = df_9['VendorName'].value_counts()
         df_9['VendorName_counts'] = df_9['VendorName'].map(counts)
         return df_9.drop_duplicates(subset=['VendorName']).sort_values(by='VendorName_counts', ascending=False)
-    
+       
     @output
     @render.data_frame
     def df_3():
@@ -621,7 +621,7 @@ def server(input, output, session):
     def df_filter():
         return render.DataTable(
             df_filtered,
-            row_selection_mode = 'multiple',
+            selection_mode = 'rows',
             width = "100%",
            filters = True,
         )
