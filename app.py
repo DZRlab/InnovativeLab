@@ -1,4 +1,3 @@
-from shiny import App, render, ui
 import pandas as pd
 import numpy as np
 import io
@@ -8,7 +7,11 @@ import matplotlib.pyplot as plt
 from shiny.types import ImgData
 from shiny import App, render, ui, reactive, req, ui
 
-#df = pd.read_excel('ContractsALL.xlsx')
+#NOTE: To improve efficency, this part of the code could be run in a separate script 
+# and the resulting dataframe saved as a csv file.
+# That csv could be uploaded to AWS and read directly via read.csv
+# This would save time and resources as the data would not have to be read and processed 
+# each time the app is run.
 
 # D:\\test\InnovativeLab\ContractsSMALL.csv
 with open("InnovativeLab/ContractsSMALL.csv", 'rb') as f:
@@ -24,9 +27,10 @@ with open("InnovativeLab/ContractsSMALL.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
-# D:\\test\InnovativeLab\ContractsSMALL.csv
+#df.to_csv('Contracts_decoded.csv', encoding='utf-8', sep = ';')
 df = pd.read_csv(io.StringIO(decoded_data), sep=';')
 
+#TODO; to optimize code get rid of these copies of df. do filtering where applicable.
 df_111 = df[df['NumberOfOffers'] == 1]
 df_10 = df[["ProcessNumber","ContractingInstitutionName", "Subject",
                 "ContractDate" , "ContractNumber" , "VendorName" , 
@@ -35,8 +39,6 @@ df_10 = df[["ProcessNumber","ContractingInstitutionName", "Subject",
 df_filtered = df[["ProcessNumber","ContractingInstitutionName",
                    "Subject","ContractDate","ContractNumber",
                    "VendorName","ContractPrice"]]
-
-#df.to_csv('Contracts_decoded.csv', encoding='utf-8', sep = ';')
 
 # creating a dict to use for drop-down box 
 dict_institution = {k: k for k in df["ContractingInstitutionName"].unique()}
@@ -54,7 +56,8 @@ exclude_cols = ['ProcessNumber','Subject','ProcurementName',
 # creating dict for drop-down checkbox_columns
 formatted_data = {item: item for item in df.columns if item not in exclude_cols}
 
-#PREVIEW
+
+# UI
 app_ui = ui.page_navbar(
     shinyswatch.theme.lumen(),
 # 1TAB preview
@@ -304,6 +307,7 @@ app_ui = ui.page_navbar(
         "УПАТСТВО",
         ui.h3({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, ""),
         ui.output_image("image9", height="50%"),
+    #TODO; this text could be put in a seperate file and sourced
     ui.markdown(
     """
     Апликацијата за пребарување и преземање на податоци од склучени договори по јавни набавки, се базира на податоците кои Бирото за јавни набавки ги објавува на Електронскиот систем за јавни набавки (ЕСЈН) во делот на склучени договори.
@@ -349,68 +353,79 @@ app_ui = ui.page_navbar(
     bg = "#d1dae3",
 )
 
+# Define a generic filtering function
+def filter_df(df,
+              institution_name = None,
+              vendor_name = None,
+              date_range = None,
+              min_amount = None,
+              max_amount = None,
+              group_by = None,
+              top_n = None,
+              columns = None,
+              convert_to_int = False):
+    if institution_name:
+        df = df[df['ContractingInstitutionName'] == institution_name]
+    if vendor_name:
+        df = df[df['VendorName'] == vendor_name]
+    if date_range:
+        start_date, end_date = date_range
+        df["ContractDate"] = pd.to_datetime(df["ContractDate"]).dt.date
+        mask = (df["ContractDate"] >= start_date) & (df["ContractDate"] <= end_date)
+        df = df[mask]
+        df["ContractDate"] = pd.to_datetime(df["ContractDate"]).dt.strftime("%Y-%m-%d")
+    if min_amount is not None and max_amount is not None:
+        df = df[df["ContractPrice"].between(min_amount, max_amount)]
+    if group_by:
+        df = df.groupby(group_by)['ContractPrice'].sum().reset_index()
+    if top_n:
+        df = df.sort_values(by='ContractPrice', ascending=False).head(top_n)
+    if columns:
+        df = df[columns]
+    if convert_to_int:
+        df['ContractPrice'] = df['ContractPrice'].astype(float).astype(int)
+    return df
 
 def server(input, output, session):
+
+    # Image rendering functions
+    def render_image(image_name, width="100%"):
+        from pathlib import Path
+        dir = Path(__file__).resolve().parent
+        img: ImgData = {"src": str(dir / image_name), "width": width}
+        return img
+
     @render.image
     def image():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "logo.png"), "width": "80px"}
-        return img
+        return render_image("logo.png", "80px")
     @render.image
     def image2():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "dzrA.jpg"), "width": "100%"}
-        return img
+        return render_image("dzrA.jpg")
     @render.image
     def image3():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "tab2.jpg"), "width": "100%"}
-        return img
+        return render_image("tab2.jpg")
     @render.image
     def image4():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "tab3.jpg"), "width": "100%"}
-        return img
+        return render_image("tab3.jpg")
     @render.image
     def image5():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "tab4.jpg"), "width": "100%"}
-        return img
+        return render_image("tab4.jpg")
     @render.image
     def image6():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "tab5.jpg"), "width": "100%"}
-        return img
+        return render_image("tab5.jpg")
     @render.image
     def image7():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "tab6.jpg"), "width": "100%"}
-        return img
+        return render_image("tab6.jpg")
     @render.image
     def image8():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "tab7.jpg"), "width": "100%"}
-        return img
+        return render_image("tab7.jpg")
     @render.image
     def image9():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "tab8.jpg"), "width": "100%"}
-        return img
+        return render_image("tab8.jpg")
     @render.image
     def imagekr():
-        from pathlib import Path
-        dir = Path(__file__).resolve().parent
-        img: ImgData = {"src": str(dir / "tabkr.jpg"), "width": "100%"}
-        return img
+        return render_image("tabkr.jpg")
+    
     @render.text
     def value_n():
         dali = input.numeric()
@@ -420,30 +435,13 @@ def server(input, output, session):
                          value = [35, 1000000])
     @reactive.Calc
     def filter():
-        # filter 1
-        df_1 = df[df['ContractingInstitutionName'] == input.selectize()]
-        # filter 2
-        start_date = input.daterange()[0]
-        end_date = input.daterange()[1]
-        df_1 = pd.DataFrame(df_1)
-        df_1["ContractDate"] = pd.to_datetime(df_1["ContractDate"]).dt.date 
-        mask = (df_1["ContractDate"] >= start_date) & (df_1["ContractDate"] <= end_date)
-        filtered_df = df_1[mask]
-        filtered_df = pd.DataFrame(filtered_df)
-        filtered_df["ContractDate"] = pd.to_datetime(filtered_df["ContractDate"]).dt.strftime("%Y-%m-%d")
-
-        # remmoving decimal places and remove decimal point
-        filtered_df[['EstimatedPrice','ContractPriceWithoutVat','ContractPrice']].astype(float).astype(int)
-        filtered_df.EstimatedPrice = filtered_df.EstimatedPrice.apply(int)
-        filtered_df.ContractPriceWithoutVat = filtered_df.ContractPriceWithoutVat.apply(int)
-        filtered_df.ContractPrice = filtered_df.ContractPrice.apply(int)
-        
-        # filter 3: columns
-        list_1 = list(input.checkbox_columns())
-        formatted_data = {item: item for item in list_1}
-        keys = list(formatted_data.keys())
-        filtered_df = filtered_df.drop(columns = keys)
-        return filtered_df.sort_values(by='ContractPrice', ascending = False)
+        return filter_df(
+            df,
+            institution_name=input.selectize(),
+            date_range=input.daterange(),
+            columns=[col for col in df.columns if col not in input.checkbox_columns()],
+            convert_to_int=True
+        ).sort_values(by='ContractPrice', ascending=False)
         
 
     #note; this applies all filters defined in filter() and saves the result in df_1
@@ -497,12 +495,12 @@ def server(input, output, session):
     ### plots ###
     @reactive.Calc
     def filter_for_plot():
-        # filter 1
-        filtered_for_plot = df[df['ContractingInstitutionName'] == input.selectize_for_plot()]
-        # filter 2
+        filtered_for_plot = filter_df(
+            df,
+            institution_name=input.selectize_for_plot()
+        )
         min_amount = input.slider()[0]
         max_amount = input.slider()[1]
-        filtered_for_plot = pd.DataFrame(filtered_for_plot)
         filtered_for_plot = filtered_for_plot[filtered_for_plot["ContractPrice"].between(min_amount, max_amount)]
         return filtered_for_plot.sort_values(by='ContractPrice', ascending=False)
 
@@ -525,22 +523,15 @@ def server(input, output, session):
     
     @reactive.Calc
     def filter_3():
-        df_3 = df[df['VendorName'] == input.selectize_for()]
-        start_date = input.daterange1()[0]
-        end_date = input.daterange1()[1]
-        df_3 = pd.DataFrame(df_3)
-        df_3["ContractDate"] = pd.to_datetime(df_3["ContractDate"]).dt.date 
-        mask1 = (df_3["ContractDate"] >= start_date) & (df_3["ContractDate"] <= end_date)
-        filtered_df3 = df_3[mask1]
-        filtered_df3 = pd.DataFrame(filtered_df3)
-        filtered_df3["ContractDate"] = pd.to_datetime(filtered_df3["ContractDate"]).dt.strftime("%Y-%m-%d")
-        filtered_df3=filtered_df3[["ProcessNumber","ContractingInstitutionName","Subject","ProcurementName",
-                                   "AgreementStartDate","AgreementEndDate","ContractDate","ContractNumber",
-                                   "NumberOfOffers","VendorName","ContractPrice"]]
-        # remmoving decimal places and remove decimal point
-        filtered_df3['ContractPrice'].astype(float).astype(int)
-        filtered_df3.ContractPrice = filtered_df3.ContractPrice.apply(int)
-        return filtered_df3.sort_values(by='ContractPrice', ascending=False)
+        return filter_df(
+        df,
+        vendor_name=input.selectize_for(),
+        date_range=input.daterange1(),
+        columns=["ProcessNumber", "ContractingInstitutionName", "Subject", "ProcurementName",
+                 "AgreementStartDate", "AgreementEndDate", "ContractDate", "ContractNumber",
+                 "NumberOfOffers", "VendorName", "ContractPrice"],
+                 convert_to_int = True
+                 ).sort_values(by='ContractPrice', ascending = False)
     
     @render.plot(alt = "Histogram")  
     def plot1():
@@ -552,102 +543,79 @@ def server(input, output, session):
 
     @reactive.Calc
     def filter_5():
-        df_5 = df_111[df_111['ContractingInstitutionName'] == input.selectize_for1()]
-        df_5 = df_5[["ProcessNumber","ContractingInstitutionName","Subject",
-                     "ProcurementName","AgreementStartDate","AgreementEndDate",
-                     "ContractDate","ContractNumber","NumberOfOffers","VendorName",
-                     "ContractPrice"]]
-        return df_5.sort_values(by='ContractPrice', ascending=False)
+        return filter_df(
+        df_111,
+        institution_name=input.selectize_for1(),
+        columns=["ProcessNumber", "ContractingInstitutionName", "Subject", "ProcurementName",
+                 "AgreementStartDate", "AgreementEndDate", "ContractDate", "ContractNumber",
+                 "NumberOfOffers", "VendorName", "ContractPrice"],
+        convert_to_int = False).sort_values(by = 'ContractPrice', ascending = False)
 
     def filter_5_hist():
-        df_5t = df_111[df_111['ContractingInstitutionName'] == input.selectize_for1()]
-        df_5t = df_5t[["ProcessNumber","ContractingInstitutionName","Subject",
-                       "ProcurementName","AgreementStartDate","AgreementEndDate",
-                       "ContractDate","ContractNumber","NumberOfOffers","VendorName",
-                       "ContractPrice"]]
-        df_5t = df_5t.sort_values(by = 'ContractDate', ascending = True)
-        df_5t['ContractDate'] = pd.to_datetime(df.ContractDate, format = '%Y-%M-%d')
-        df_5t['ContractDate']=df_5t['ContractDate'].dt.strftime('%Y')
+        df_5t = filter_df(
+            df_111,
+            institution_name=input.selectize_for1(),
+            columns=["ProcessNumber", "ContractingInstitutionName", "Subject", "ProcurementName",
+                     "AgreementStartDate", "AgreementEndDate", "ContractDate", "ContractNumber",
+                     "NumberOfOffers", "VendorName", "ContractPrice"],
+        ).sort_values(by='ContractPrice', ascending=True)
+        df_5t['ContractDate'] = pd.to_datetime(df_5t['ContractDate'], format='%Y-%m-%d')
+        df_5t['ContractDate'] = df_5t['ContractDate'].dt.strftime('%Y')
         return df_5t
 
     @reactive.Calc
     def filter_6():
-        df_6 = df_111[df_111['VendorName'] == input.selectize_for11()]
-        df_6 = df_6[["ProcessNumber","ContractingInstitutionName","Subject",
-                     "ProcurementName","AgreementStartDate","AgreementEndDate",
-                     "ContractDate","ContractNumber","NumberOfOffers","VendorName",
-                     "ContractPrice"]]
-        return df_6.sort_values(by = 'ContractPrice', ascending = False)
+        return filter_df(
+        df_111,
+        vendor_name=input.selectize_for11(),
+        columns=["ProcessNumber", "ContractingInstitutionName", "Subject", "ProcurementName",
+                 "AgreementStartDate", "AgreementEndDate", "ContractDate", "ContractNumber",
+                 "NumberOfOffers", "VendorName", "ContractPrice"],
+        convert_to_int=False).sort_values(by='ContractPrice', ascending=False)
 
     @reactive.Calc
     def filter_8():
-        df_8 = pd.DataFrame(df)
-        df_8 = df_8[["VendorName","ContractPrice"]]
-        df_8.groupby(['VendorName'])['ContractPrice'].sum()
-        df_8 = df_8.sort_values(by = 'ContractPrice', ascending = False)
-        df_8 = df_8.head(10000)
-        return df_8
+        return filter_df(
+        df,
+        group_by = 'VendorName',
+        top_n = 10000,
+        convert_to_int = True)[["VendorName", "ContractPrice"]]
     
     def filter_7():
-        df_7 = df[["VendorName", "ContractPrice"]]
-        df_7 = pd.DataFrame(df_7)
-        amount = df_7.groupby('VendorName')['ContractPrice'].sum()
-        df_7['Vendor_amount'] = df_7['VendorName'].map(amount)
-        df_7 = df_7[["VendorName","Vendor_amount"]]
-        filter_df_7= pd.DataFrame(df_7)
-        filter_df_7 = filter_df_7.drop_duplicates(subset = ['Vendor_amount'])
-        return filter_df_7.sort_values(by = 'Vendor_amount', ascending = False)
+        df_7 = filter_df(df, group_by='VendorName', convert_to_int=True)
+        df_7['Vendor_amount'] = df_7['ContractPrice']
+        return df_7[["VendorName", "Vendor_amount"]].drop_duplicates(subset=['Vendor_amount']).sort_values(by='Vendor_amount', ascending=False)
     
     def filter_9():
-        df_9 = pd.DataFrame(df)
-        df_9 = df_9[["VendorName"]]
+        df_9 = df[["VendorName"]]
         counts = df_9['VendorName'].value_counts()
         df_9['VendorName_counts'] = df_9['VendorName'].map(counts)
-        df_9 = df_9.drop_duplicates(subset=['VendorName'])
-        return df_9.sort_values(by='VendorName_counts', ascending=False)
- 
+        return df_9.drop_duplicates(subset=['VendorName']).sort_values(by='VendorName_counts', ascending=False)
+    
     @output
     @render.data_frame
     def df_3():
-        return render.DataGrid(
-        filter_3()
-        )
+        return render.DataGrid(filter_3())
     
     @render.data_frame
     def df_5():
-        return render.DataGrid(
-        filter_5()  
-        )
+        return render.DataGrid(filter_5())
     
     @render.data_frame
     def df_6():
-        return render.DataGrid(
-        filter_6()  
-        )
+        return render.DataGrid(filter_6())
     
     @render.data_frame
     def df_8():
-        return render.DataGrid(
-        filter_8(),
-        width="100%",
-        height="250px" 
-        )
+        return render.DataGrid(filter_8(), width = "100%", height = "250px")
     
     @render.data_frame
     def df_7():
-        return render.DataGrid(
-        filter_7(),
-        width="100%",
-        height="250px" 
-        )
+        return render.DataGrid(filter_7(), width = "100%", height = "250px")
 
     @render.data_frame
     def df_9():
-        return render.DataGrid(
-        filter_9(),
-        width="100%",
-        height="250px" 
-        )
+        return render.DataGrid(filter_9(), width = "100%", height = "250px")
     
     @render.data_frame
     def df_filter():
