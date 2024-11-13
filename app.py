@@ -14,8 +14,10 @@ from shiny import App, render, ui, reactive, req, ui
 # each time the app is run.
 
 # D:\\test\InnovativeLab\ContractsSMALL.csv
-with open("InnovativeLab/ContractsSMALL.csv", 'rb') as f:
+#with open("InnovativeLab/ContractsSMALL.csv", 'rb') as f:
+with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
     bom = f.read(2)
+
 if bom == b'\xff\xfe':
     print('File is encoded as UTF-16-LE')
 elif bom == b'\xfe\xff':
@@ -23,7 +25,7 @@ elif bom == b'\xfe\xff':
 else:
     print('File does not have a BOM, so the version of UTF-16 is unknown')
 
-with open("InnovativeLab/ContractsSMALL.csv", 'rb') as f:
+with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
@@ -31,10 +33,11 @@ with open("InnovativeLab/ContractsSMALL.csv", 'rb') as f:
 df = pd.read_csv(io.StringIO(decoded_data), sep=';')
 
 #TODO; to optimize code get rid of these copies of df. do filtering where applicable.
+
 df_111 = df[df['NumberOfOffers'] == 1]
-df_10 = df[["ProcessNumber","ContractingInstitutionName", "Subject",
-                "ContractDate" , "ContractNumber" , "VendorName" , 
-                "ContractPrice"]]
+#df_10 = df[["ProcessNumber","ContractingInstitutionName", "Subject",
+#            "ContractDate" , "ContractNumber" , "VendorName" , 
+#            "ContractPrice"]]
 
 df_filtered = df[["ProcessNumber","ContractingInstitutionName",
                    "Subject","ContractDate","ContractNumber",
@@ -56,6 +59,8 @@ exclude_cols = ['ProcessNumber','Subject','ProcurementName',
 # creating dict for drop-down checkbox_columns
 formatted_data = {item: item for item in df.columns if item not in exclude_cols}
 
+with open('help_menu.txt', 'r', encoding='utf-8') as file:
+    help_menu_content = file.read()
 
 # UI
 app_ui = ui.page_navbar(
@@ -78,12 +83,12 @@ app_ui = ui.page_navbar(
             ui.layout_columns(
                 ui.card(
                     ui.card_header("Вкупен број на Јавни Набавки"),
-                ui.p(str(df['ProcessNumber'].nunique()), 
+                ui.p(str(len(df)), 
                      style="color:red; text-align: center; font-size:400%"),
                     ),
                 ui.card(
                     ui.card_header("Вкупен број на СУБЈЕКТИ"),
-                ui.p(str(df['Subject'].nunique()), 
+                ui.p(str(df['ContractingInstitutionName'].nunique()), 
                      style="background-color:darkgoldenrod; text-align: center; font-size:400%"),
                     ),
                 ui.card(
@@ -308,49 +313,56 @@ app_ui = ui.page_navbar(
         ui.h3({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, ""),
         ui.output_image("image9", height="50%"),
     #TODO; this text could be put in a seperate file and sourced
-    ui.markdown(
-    """
-    Апликацијата за пребарување и преземање на податоци од склучени договори по јавни набавки, се базира на податоците кои Бирото за јавни набавки ги објавува на Електронскиот систем за јавни набавки (ЕСЈН) во делот на склучени договори.
-    Податоците се преземаат и ажурираат на секои 6 месеци од следниов линк:
-    https://www.e-nabavki.gov.mk/PublicAccess/home.aspx#/contracts/0  
 
-    Со апликацијата можете да ги пребарувате и преземате податоците за склучени договори по јавни набавки од страна на субјектите, при што можете да селектирате набавки склучени од одреден субјект, за одреден период како и набавки по одреден вид на набавки за повеќе субјекти.  
+    ## Read the content of the text file
+    #with open('help.txt', 'r', encoding='utf-8') as file:
+    #content = file.read()
+    ##    help_menu_content = file.read()
+    ui.markdown(help_menu_content)
+    
+    #ui.markdown(
+    #"""
+    #Апликацијата за пребарување и преземање на податоци од склучени договори по јавни набавки, се базира на податоците кои Бирото за јавни набавки ги објавува на Електронскиот систем за јавни набавки (ЕСЈН) во делот на склучени договори.
+    #Податоците се преземаат и ажурираат на секои 6 месеци од следниов линк:
+    #https://www.e-nabavki.gov.mk/PublicAccess/home.aspx#/contracts/0  
 
-    За употреба на **ИЗБОР НА СУБЈЕКТ** или **ИЗБОР НА НОСИТЕЛ НА НАБАВКА** потребно е да кликнете на малиот триаголник десно на полето за избор, да го избришете полето со **backspace** и како ги внесувате буквите од името на субјектот така истите се филтрираат и го одбирате субјектот за кои ви требаат податоци.  
-    При Анализа на податоци по но**сител на набавка** во полето **Одбери најголема вредност** ја внесувате максималната вредност за јавните набавки за кои сакате податоци и истата ќе се прикаже на лизгачот за **Одбери опсег на вредноста на Јавните набавки**.  
+    #Со апликацијата можете да ги пребарувате и преземате податоците за склучени договори по јавни набавки од страна на субјектите, при што можете да селектирате набавки склучени од одреден субјект, за одреден период како и набавки по одреден вид на набавки за повеќе субјекти.  
 
-    Во апликацијата се дефинирани повеќе табови и тоа:  
+    #За употреба на **ИЗБОР НА СУБЈЕКТ** или **ИЗБОР НА НОСИТЕЛ НА НАБАВКА** потребно е да кликнете на малиот триаголник десно на полето за избор, да го избришете полето со **backspace** и како ги внесувате буквите од името на субјектот така истите се филтрираат и го одбирате субјектот за кои ви требаат податоци.  
+    #При Анализа на податоци по но**сител на набавка** во полето **Одбери најголема вредност** ја внесувате максималната вредност за јавните набавки за кои сакате податоци и истата ќе се прикаже на лизгачот за **Одбери опсег на вредноста на Јавните набавки**.  
 
-    **Склучени договори** – Ви дава информација за склучени договори по субјект, по период кога е склучен договорот.  
+    #Во апликацијата се дефинирани повеќе табови и тоа:  
 
-    **Преглед на набавки** – Можност за преглед на број на набавки по одредени стратуми во опсег на износи на договорите (Вредноста на договорите не значи и дека вкупната вредност на договорот е реализирана).  
+    #**Склучени договори** – Ви дава информација за склучени договори по субјект, по период кога е склучен договорот.  
 
-    Анализа на податоци по **носител на набавка** – Преглед на склучени договори по носител на набавка и по период на набавка.  
+    #**Преглед на набавки** – Можност за преглед на број на набавки по одредени стратуми во опсег на износи на договорите (Вредноста на договорите не значи и дека вкупната вредност на договорот е реализирана).  
 
-    Склучени **договори со една понуда** – Статистика по договорни органи кои склучиле договори за јавни набавки по набавки каде имало една понуда, по периоди.  
+    #Анализа на податоци по **носител на набавка** – Преглед на склучени договори по носител на набавка и по период на набавка.  
 
-    Склучени договори со **една понуда по носител на набавка** – Овде можете да видите статистика на склучени договори по носител на набавка при што во набавката понуда дал само еден економски оператор, по субјект и по периоди.  
+    #Склучени **договори со една понуда** – Статистика по договорни органи кои склучиле договори за јавни набавки по набавки каде имало една понуда, по периоди.  
 
-
-    Пребарување по критериуми – Можност за филтрирање податоци по различни критериуми – Број на набавка, субјект, назив (може и збор кој се содржи во називот – лекови, нафта, антивирус, мобилен и сл.), период на набавка.  
-
-    **Статистика** – Статистички податоци за набавки со најголеми износи, наголем број на склучени договори по носител на набавка, најголеми износи на склучени договори по договорен орган.  
-
-    **Упатство** – Објаснување за користење на апликацијата.  
+    #Склучени договори со **една понуда по носител на набавка** – Овде можете да видите статистика на склучени договори по носител на набавка при што во набавката понуда дал само еден економски оператор, по субјект и по периоди.  
 
 
-    Откако ќе ги селектирате сите колони за кои сакате да ги преземете податоците, стартувајте го копчето **`ПРЕЗЕМИ`**.
-    Податоците ќе се снимат pod име JN_SUBJEKT.xlsx во папката Downloads и за да можете да ги користите, потребно е да ги вчитате во Еxcel и притоа во процесот на вчитување ќе треба да потврдите дека податоците се од доверлив извор.
-    На ист начин се снимаат и користат преземените податоци кои се однесуваат за Носител на Јавната набавка: JN_NOSITEL.xlsx.
+    #Пребарување по критериуми – Можност за филтрирање податоци по различни критериуми – Број на набавка, субјект, назив (може и збор кој се содржи во називот – лекови, нафта, антивирус, мобилен и сл.), период на набавка.  
 
-    ```
-    Откако ќе ги селектирате сите колони за кои сакате да ги преземете податоците, стартувајте го копчето преземи.
-    Податоците ќе се снимат во колоната Downloads и за да можете да ги користите, потребно е да ги вчитате во Еxcel при што ќе пристапите до папката и со помош на Get Data from Text/CSV ќе ги вчитате во нов документ.
+    #**Статистика** – Статистички податоци за набавки со најголеми износи, наголем број на склучени договори по носител на набавка, најголеми износи на склучени договори по договорен орган.  
 
-"""
-    )),
-    position = ("fixed-top"),
-    bg = "#d1dae3",
+    #**Упатство** – Објаснување за користење на апликацијата.  
+
+
+    #Откако ќе ги селектирате сите колони за кои сакате да ги преземете податоците, стартувајте го копчето **`ПРЕЗЕМИ`**.
+    #Податоците ќе се снимат pod име JN_SUBJEKT.xlsx во папката Downloads и за да можете да ги користите, потребно е да ги вчитате во Еxcel и притоа во процесот на вчитување ќе треба да потврдите дека податоците се од доверлив извор.
+    #На ист начин се снимаат и користат преземените податоци кои се однесуваат за Носител на Јавната набавка: JN_NOSITEL.xlsx.
+
+    #```
+    #Откако ќе ги селектирате сите колони за кои сакате да ги преземете податоците, стартувајте го копчето преземи.
+    #Податоците ќе се снимат во колоната Downloads и за да можете да ги користите, потребно е да ги вчитате во Еxcel при што ќе пристапите до папката и со помош на Get Data from Text/CSV ќе ги вчитате во нов документ.
+    #```
+    #"""
+    ),
+position = ("fixed-top"),
+bg = "#d1dae3",
 )
 
 # Define a generic filtering function
@@ -457,14 +469,18 @@ def server(input, output, session):
         df_export = filter()
         # Insert empty columns
         #TODO; Try using .loc[row_indexer,col_indexer] = value instead
-        df_export['IzvorNaSredstva'] = 'NULL'  
-        df_export['A'] = ''
+
+        df_export.loc[:, 'A'] = ''
+        ###df_export['IzvorNaSredstva'] = 'NULL'  
+        #df_export['A'] = ''
+        
         df_export['ID'] = range(1, len(df_export) + 1) 
 
-        # List of columns in the desired order
+        # List of columns in the desired order 
+        # ContractPriceWithoutVat SHOULD BE IN  df_export
         df_export = df_export[['ID','A','A','A','A','EstimatedPrice', 'A', 'OfferTypeName',
                                'UseElectronicTools','ProcedureName','Subject','ContractNumber',
-                               'ContractDate','ProcurementName','VendorName']] #,'ContractPriceWithoutVat'
+                               'ContractDate','ProcurementName','VendorName','ContractPriceWithoutVat']],
         return df_export
     
     @reactive.Calc
@@ -574,22 +590,36 @@ def server(input, output, session):
         convert_to_int=False).sort_values(by='ContractPrice', ascending=False)
 
     @reactive.Calc
+    #DESCENDING LIST OF BIGGEST VENDORNAME CONTRACTPRICE'S...show mE negative number
     def filter_8():
-        return filter_df(
-        df,
-        group_by = 'VendorName',
-        top_n = 10000,
-        convert_to_int = True)[["VendorName", "ContractPrice"]]
-    
+        ###df_8 = pd.DataFrame(df)
+        df_8 = df[["VendorName","ContractPrice"]]
+        df_8 = df_8.sort_values(by='ContractPrice', ascending=False)
+        df_8 = df_8.head(10000)
+        return df_8
+        #return filter_df(
+        #df,
+        #group_by = 'VendorName',
+        #top_n = 10000,
+        #convert_to_int = True)[["VendorName", "ContractPrice"]]
+
+      #DESCENDING LIST OF A SUM OF VENDOR CONTRACTPRICE'S, SHOW ME REPEATING ROWS, MUST USE DROP
     def filter_7():
-        df_7 = filter_df(df, group_by='VendorName', convert_to_int=True)
-        df_7['Vendor_amount'] = df_7['ContractPrice']
+        df_7 = df[["VendorName","ContractPrice"]]
+        amount = df_7.groupby('VendorName')['ContractPrice'].sum()
+        df_7['Vendor_amount'] = df_7['VendorName'].map(amount)
+        df_7 = df_7[["VendorName","Vendor_amount"]]
+        #df_7 = df_7.drop_duplicates(subset=['Vendor_amount'])
+        #return df_7.sort_values(by='Vendor_amount', ascending=False)
+        #df_7 = filter_df(df, group_by='VendorName', convert_to_int=True)
+        #df_7['Vendor_amount'] = df_7['ContractPrice']
         return df_7[["VendorName", "Vendor_amount"]].drop_duplicates(subset=['Vendor_amount']).sort_values(by='Vendor_amount', ascending=False)
     
     def filter_9():
         df_9 = df[["VendorName"]]
         counts = df_9['VendorName'].value_counts()
-        df_9['VendorName_counts'] = df_9['VendorName'].map(counts)
+        df_9.loc[:, 'VendorName_counts'] = df_9['VendorName'].map(counts)
+        ##df_9['VendorName_counts'] = df_9['VendorName'].map(counts)
         return df_9.drop_duplicates(subset=['VendorName']).sort_values(by='VendorName_counts', ascending=False)
        
     @output
@@ -617,13 +647,15 @@ def server(input, output, session):
     def df_9():
         return render.DataGrid(filter_9(), width = "100%", height = "250px")
     
+    ##row_selection mode
     @render.data_frame
     def df_filter():
         return render.DataTable(
             df_filtered,
-            selection_mode = 'rows',
+            row_selection_mode='multiple',
             width = "100%",
-           filters = True,
+            filters = True,
         )
+
 
 app = App(app_ui, server)
