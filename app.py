@@ -31,6 +31,11 @@ with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
 
 #df.to_csv('Contracts_decoded.csv', encoding='utf-8', sep = ';')
 df = pd.read_csv(io.StringIO(decoded_data), sep=';')
+#df.fillna(0, inplace=True)  # Replace missing values with 0
+#df['ContractPrice'] = pd.to_numeric(df['ContractPrice'], errors='coerce')
+
+##df = df[df['ContractPrice'].fillna(0) >= 0]
+#df['ContractPrice'] = df['ContractPrice'].astype(float).astype('int64')
 
 #TODO; to optimize code get rid of these copies of df. do filtering where applicable.
 
@@ -75,8 +80,8 @@ app_ui = ui.page_navbar(
         ui.row(
         ui.card(  
             ui.card_header("ИЗВОР НА ПОДАТОЦИТЕ"),
-            ui.p("Податоците во оваа апликација се превземени од Електронскиот систем за јавни набавки - " +
-                 "ЕСЈН во делот на склучени договори објавени во системот во период 01.01.2021 до 30.06.2024"),
+            ui.p("Податоците во оваа апликација се преземени од Електронскиот систем за јавни набавки - " + ### преземени INSTEAD превземени
+                 "ЕСЈН во делот на склучени договори објавени во системот во период 01.01.2021 до 11.11.2024"),
             ),
         ui.card(
             ui.card_header("СТАТИСТИЧКИ ПОДАТОЦИ"),
@@ -178,7 +183,7 @@ app_ui = ui.page_navbar(
                 ui.input_numeric("numeric", "Внеси ја максималната вредност на ЈН",
                                   10000000,
                                   min = 300000,
-                                  max = 1000000000,
+                                  max = 1000000000000,  ###increase max with addind 000
                                   width = "500px"), 
                 ui.output_text_verbatim("value_n"),
                 ),
@@ -312,54 +317,7 @@ app_ui = ui.page_navbar(
         "УПАТСТВО",
         ui.h3({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, ""),
         ui.output_image("image9", height="50%"),
-    #TODO; this text could be put in a seperate file and sourced
-
-    ## Read the content of the text file
-    #with open('help.txt', 'r', encoding='utf-8') as file:
-    #content = file.read()
-    ##    help_menu_content = file.read()
     ui.markdown(help_menu_content)
-    
-    #ui.markdown(
-    #"""
-    #Апликацијата за пребарување и преземање на податоци од склучени договори по јавни набавки, се базира на податоците кои Бирото за јавни набавки ги објавува на Електронскиот систем за јавни набавки (ЕСЈН) во делот на склучени договори.
-    #Податоците се преземаат и ажурираат на секои 6 месеци од следниов линк:
-    #https://www.e-nabavki.gov.mk/PublicAccess/home.aspx#/contracts/0  
-
-    #Со апликацијата можете да ги пребарувате и преземате податоците за склучени договори по јавни набавки од страна на субјектите, при што можете да селектирате набавки склучени од одреден субјект, за одреден период како и набавки по одреден вид на набавки за повеќе субјекти.  
-
-    #За употреба на **ИЗБОР НА СУБЈЕКТ** или **ИЗБОР НА НОСИТЕЛ НА НАБАВКА** потребно е да кликнете на малиот триаголник десно на полето за избор, да го избришете полето со **backspace** и како ги внесувате буквите од името на субјектот така истите се филтрираат и го одбирате субјектот за кои ви требаат податоци.  
-    #При Анализа на податоци по но**сител на набавка** во полето **Одбери најголема вредност** ја внесувате максималната вредност за јавните набавки за кои сакате податоци и истата ќе се прикаже на лизгачот за **Одбери опсег на вредноста на Јавните набавки**.  
-
-    #Во апликацијата се дефинирани повеќе табови и тоа:  
-
-    #**Склучени договори** – Ви дава информација за склучени договори по субјект, по период кога е склучен договорот.  
-
-    #**Преглед на набавки** – Можност за преглед на број на набавки по одредени стратуми во опсег на износи на договорите (Вредноста на договорите не значи и дека вкупната вредност на договорот е реализирана).  
-
-    #Анализа на податоци по **носител на набавка** – Преглед на склучени договори по носител на набавка и по период на набавка.  
-
-    #Склучени **договори со една понуда** – Статистика по договорни органи кои склучиле договори за јавни набавки по набавки каде имало една понуда, по периоди.  
-
-    #Склучени договори со **една понуда по носител на набавка** – Овде можете да видите статистика на склучени договори по носител на набавка при што во набавката понуда дал само еден економски оператор, по субјект и по периоди.  
-
-
-    #Пребарување по критериуми – Можност за филтрирање податоци по различни критериуми – Број на набавка, субјект, назив (може и збор кој се содржи во називот – лекови, нафта, антивирус, мобилен и сл.), период на набавка.  
-
-    #**Статистика** – Статистички податоци за набавки со најголеми износи, наголем број на склучени договори по носител на набавка, најголеми износи на склучени договори по договорен орган.  
-
-    #**Упатство** – Објаснување за користење на апликацијата.  
-
-
-    #Откако ќе ги селектирате сите колони за кои сакате да ги преземете податоците, стартувајте го копчето **`ПРЕЗЕМИ`**.
-    #Податоците ќе се снимат pod име JN_SUBJEKT.xlsx во папката Downloads и за да можете да ги користите, потребно е да ги вчитате во Еxcel и притоа во процесот на вчитување ќе треба да потврдите дека податоците се од доверлив извор.
-    #На ист начин се снимаат и користат преземените податоци кои се однесуваат за Носител на Јавната набавка: JN_NOSITEL.xlsx.
-
-    #```
-    #Откако ќе ги селектирате сите колони за кои сакате да ги преземете податоците, стартувајте го копчето преземи.
-    #Податоците ќе се снимат во колоната Downloads и за да можете да ги користите, потребно е да ги вчитате во Еxcel при што ќе пристапите до папката и со помош на Get Data from Text/CSV ќе ги вчитате во нов документ.
-    #```
-    #"""
     ),
 position = ("fixed-top"),
 bg = "#d1dae3",
@@ -389,13 +347,13 @@ def filter_df(df,
     if min_amount is not None and max_amount is not None:
         df = df[df["ContractPrice"].between(min_amount, max_amount)]
     if group_by:
-        df = df.groupby(group_by)['ContractPrice'].sum().reset_index()
+        df = df[["VendorName","ContractPrice"]].sort_values(by='ContractPrice', ascending=False)   ###Instead df = df.groupby(group_by)['ContractPrice'].sum().reset_index()
     if top_n:
         df = df.sort_values(by='ContractPrice', ascending=False).head(top_n)
     if columns:
         df = df[columns]
     if convert_to_int:
-        df['ContractPrice'] = df['ContractPrice'].astype(float).astype(int)
+        df['ContractPrice'] = df['ContractPrice'].astype(float).astype('int64')   ###Change int with 'int64'
     return df
 
 def server(input, output, session):
@@ -453,9 +411,8 @@ def server(input, output, session):
             date_range=input.daterange(),
             columns=[col for col in df.columns if col not in input.checkbox_columns()],
             convert_to_int=True
-        ).sort_values(by='ContractPrice', ascending=False)
+            ).sort_values(by='ProcessNumber', ascending=False)  ####change ContractName to ProcessNumber
         
-
     #note; this applies all filters defined in filter() and saves the result in df_1
     @output
     @render.data_frame
@@ -467,20 +424,15 @@ def server(input, output, session):
     @reactive.Calc
     def export():
         df_export = filter()
-        # Insert empty columns
-        #TODO; Try using .loc[row_indexer,col_indexer] = value instead
-
-        df_export.loc[:, 'A'] = ''
-        ###df_export['IzvorNaSredstva'] = 'NULL'  
-        #df_export['A'] = ''
         
+        # Insert empty column and column with ordinal number
+        df_export.loc[:, 'A'] = ''
         df_export['ID'] = range(1, len(df_export) + 1) 
 
         # List of columns in the desired order 
-        # ContractPriceWithoutVat SHOULD BE IN  df_export
         df_export = df_export[['ID','A','A','A','A','EstimatedPrice', 'A', 'OfferTypeName',
-                               'UseElectronicTools','ProcedureName','Subject','ContractNumber',
-                               'ContractDate','ProcurementName','VendorName','ContractPriceWithoutVat']],
+                               'UseElectronicTools','ProcessNumber','IsDevided','ProcedureName','Subject','ContractNumber',
+                               'ContractDate','ProcurementName','VendorName','ContractPriceWithoutVat']]  ###added 'ProcessNumber'and 'IsDevided'
         return df_export
     
     @reactive.Calc
@@ -544,10 +496,10 @@ def server(input, output, session):
         vendor_name=input.selectize_for(),
         date_range=input.daterange1(),
         columns=["ProcessNumber", "ContractingInstitutionName", "Subject", "ProcurementName",
-                 "AgreementStartDate", "AgreementEndDate", "ContractDate", "ContractNumber",
+                 "AgreementStartDate", "AgreementEndDate", 'AgreeementDurationMonthsDays',"ContractDate", "ContractNumber",   ###'AgreeementDurationMonthsDays'
                  "NumberOfOffers", "VendorName", "ContractPrice"],
-                 convert_to_int = True
-                 ).sort_values(by='ContractPrice', ascending = False)
+                convert_to_int = True
+                ).sort_values(by='ContractPrice', ascending = False)
     
     @render.plot(alt = "Histogram")  
     def plot1():
@@ -565,7 +517,8 @@ def server(input, output, session):
         columns=["ProcessNumber", "ContractingInstitutionName", "Subject", "ProcurementName",
                  "AgreementStartDate", "AgreementEndDate", "ContractDate", "ContractNumber",
                  "NumberOfOffers", "VendorName", "ContractPrice"],
-        convert_to_int = False).sort_values(by = 'ContractPrice', ascending = False)
+        convert_to_int = False
+        ).sort_values(by = 'ContractPrice', ascending = False)
 
     def filter_5_hist():
         df_5t = filter_df(
@@ -574,7 +527,8 @@ def server(input, output, session):
             columns=["ProcessNumber", "ContractingInstitutionName", "Subject", "ProcurementName",
                      "AgreementStartDate", "AgreementEndDate", "ContractDate", "ContractNumber",
                      "NumberOfOffers", "VendorName", "ContractPrice"],
-        ).sort_values(by='ContractPrice', ascending=True)
+        ).sort_values(by='ContractDate', ascending=True)    ###change ContractName to ContractDAte
+        df_5t = df_5t.drop_duplicates(subset='ProcessNumber') ### newline
         df_5t['ContractDate'] = pd.to_datetime(df_5t['ContractDate'], format='%Y-%m-%d')
         df_5t['ContractDate'] = df_5t['ContractDate'].dt.strftime('%Y')
         return df_5t
@@ -587,25 +541,36 @@ def server(input, output, session):
         columns=["ProcessNumber", "ContractingInstitutionName", "Subject", "ProcurementName",
                  "AgreementStartDate", "AgreementEndDate", "ContractDate", "ContractNumber",
                  "NumberOfOffers", "VendorName", "ContractPrice"],
-        convert_to_int=False).sort_values(by='ContractPrice', ascending=False)
+        convert_to_int=False
+        ).sort_values(by='ContractPrice', ascending=False)
 
     @reactive.Calc
-    #DESCENDING LIST OF BIGGEST VENDORNAME CONTRACTPRICE'S...show mE negative number
+    #TO SHOW THE TOTAL NUMBER OF SIGNED PUBLIC PROCUREMENT CONTRACTS FOR EACH VENDOR
+    def filter_9():
+        #df_9 = df[["VendorName"]]
+        df_9=df[['VendorName']].copy()
+        counts = df_9['VendorName'].value_counts()
+        df_9.loc[:, 'VendorName_counts'] = df_9['VendorName'].map(counts)
+        ##df_9['VendorName_counts'] = df_9['VendorName'].map(counts)
+        return df_9.drop_duplicates(subset=['VendorName']).sort_values(by='VendorName_counts', ascending=False)
+    
+    #DESCENDING LIST OF BIGGEST VENDOR CONTRACTPRICE'S...show mE negative number
     def filter_8():
         ###df_8 = pd.DataFrame(df)
-        df_8 = df[["VendorName","ContractPrice"]]
-        df_8 = df_8.sort_values(by='ContractPrice', ascending=False)
-        df_8 = df_8.head(10000)
-        return df_8
-        #return filter_df(
-        #df,
-        #group_by = 'VendorName',
-        #top_n = 10000,
-        #convert_to_int = True)[["VendorName", "ContractPrice"]]
+        #df_8 = df[["VendorName","ContractPrice"]]
+        #df_8 = df_8.sort_values(by='ContractPrice', ascending=False)
+        #df_8 = df_8.head(10000)
+        #return df_8
+        return filter_df(
+        df,
+        group_by = 'ContractPrice',
+        top_n = 10000,
+        convert_to_int = True)[["VendorName", "ContractPrice"]]
 
       #DESCENDING LIST OF A SUM OF VENDOR CONTRACTPRICE'S, SHOW ME REPEATING ROWS, MUST USE DROP
     def filter_7():
-        df_7 = df[["VendorName","ContractPrice"]]
+        #df_7 = df[["VendorName","ContractPrice"]]
+        df_7=df[['VendorName',"ContractPrice"]].copy()
         amount = df_7.groupby('VendorName')['ContractPrice'].sum()
         df_7['Vendor_amount'] = df_7['VendorName'].map(amount)
         df_7 = df_7[["VendorName","Vendor_amount"]]
@@ -614,14 +579,7 @@ def server(input, output, session):
         #df_7 = filter_df(df, group_by='VendorName', convert_to_int=True)
         #df_7['Vendor_amount'] = df_7['ContractPrice']
         return df_7[["VendorName", "Vendor_amount"]].drop_duplicates(subset=['Vendor_amount']).sort_values(by='Vendor_amount', ascending=False)
-    
-    def filter_9():
-        df_9 = df[["VendorName"]]
-        counts = df_9['VendorName'].value_counts()
-        df_9.loc[:, 'VendorName_counts'] = df_9['VendorName'].map(counts)
-        ##df_9['VendorName_counts'] = df_9['VendorName'].map(counts)
-        return df_9.drop_duplicates(subset=['VendorName']).sort_values(by='VendorName_counts', ascending=False)
-       
+           
     @output
     @render.data_frame
     def df_3():
