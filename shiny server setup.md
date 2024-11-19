@@ -154,9 +154,9 @@ Version of Shiny server for Python installed for innlab.dzr.mk : 1.5.20.1002
 
 In step 3 of the Digital Ocean tutorial you have this code. As we run the innlab webapp in a private vpc the proxy_pass and proxy_redirect  needs to point to local IP, not public IP.
 
-We made a new config file called ìnnlab.dzr.mk` as repelacement for the èxample.com`file in the tutorial.
+We made a new config file called `innlab.dzr.mk` as repelacement for the `example.com` file in the tutorial.
 This code is thus included in the file `/etc/nginx/sites-available/innlab.dzr.mk`, and a shortcut for this file is added in this folder to the folder `/etc/nginx/sites-enabled`
-As explained in https://www.charlesbordet.com/en/guide-shiny-aws/#
+As explained in https://www.charlesbordet.com/en/guide-shiny-aws/#3-set-up-a-reverse-proxy-with-nginx
 
 
 ```
