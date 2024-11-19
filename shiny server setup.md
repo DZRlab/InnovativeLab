@@ -179,6 +179,7 @@ Transfer is done by using the AWS CLI tools (must be installed):
  
 
 Command: `aws s3 cp s3-file-address ec2-destination-folder`
+Transferring files directly to a EC2 system folder can be tricky, so it is recommended to first transfer the file to the instance home directory, and then move the file to the right directory using the bash `mv`command.
 
 For example to transfer the app code from S3 to shiny server instance at `/srv/shiny-server/`
 
