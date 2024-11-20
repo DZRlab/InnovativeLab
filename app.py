@@ -3,14 +3,15 @@ import pandas as pd
 import numpy as np
 import io
 import seaborn as sns
-import shinyswatch
+#import shinyswatch
 import matplotlib.pyplot as plt
 from shiny.types import ImgData
 from shiny import App, render, ui, reactive, req, ui
 
 #df = pd.read_excel('ContractsALL.xlsx')
 
-with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
+with open("ContractsSMALL.csv", 'rb') as f:
+#with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
     bom = f.read(2)
 
 if bom == b'\xff\xfe':
@@ -20,7 +21,8 @@ elif bom == b'\xfe\xff':
 else:
     print('File does not have a BOM, so the version of UTF-16 is unknown')
 
-with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
+with open("ContractsSMALL.csv", 'rb') as f:
+#with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
@@ -56,7 +58,7 @@ formatted_data = {item: item for item in col_names if item not in exclude_cols}
 
 #PREVIEW
 app_ui = ui.page_navbar(
-    shinyswatch.theme.lumen(),
+#    shinyswatch.theme.lumen(),
 # 1TAB preview
     ui.nav_panel(
     ui.output_image("image", height = "60%"),
