@@ -402,6 +402,9 @@ def server(input, output, session):
         df_export = df_export.sort_values(by='ProcessNumber', ascending=False)
         df_export = pd.DataFrame(df_export)
 
+        # Find duplicate rows based on 'ProcessNumber' and keep the first occurrence
+        df_export['EstimatedPrice'] = df_export.groupby('ProcessNumber')['EstimatedPrice'].transform(lambda x: x.mask(x.duplicated(keep='first'), 0))
+
         # Assign IDs in ascending order
         df_export['ID'] = range(1, len(df_export) + 1)
 
@@ -479,7 +482,7 @@ def server(input, output, session):
     
         # Use .loc to filter and select columns in one step
         filtered_df3 = df_3.loc[mask1, ["ProcessNumber", "ContractingInstitutionName", "Subject", "ProcurementName", 
-                                    "AgreementStartDate", "AgreementEndDate", "ContractDate", "ContractNumber", 
+                                    "AgreeementDurationMonthsDays","ContractDate", "ContractNumber", 
                                     "NumberOfOffers", "VendorName", "ContractPrice"]].copy()
     
         # Convert ContractDate to string format
@@ -517,13 +520,13 @@ def server(input, output, session):
     @reactive.Calc
     def filter_5():
         df_5 = df_111[df_111['ContractingInstitutionName'] == input.selectize_for1()]
-        df_5 = df_5[["ProcessNumber","ContractingInstitutionName","Subject","ProcurementName","AgreementStartDate",
-                     "AgreementEndDate","ContractDate","ContractNumber","NumberOfOffers","VendorName","ContractPrice"]]
+        df_5 = df_5[["ProcessNumber","ContractingInstitutionName","Subject","ProcurementName","AgreeementDurationMonthsDays",
+                     "ContractDate","ContractNumber","NumberOfOffers","VendorName","ContractPrice"]]
         return df_5.sort_values(by='ContractPrice', ascending=False)
     def filter_5t():
         df_5t = df_111[df_111['ContractingInstitutionName'] == input.selectize_for1()]
-        df_5t = df_5t[["ProcessNumber","ContractingInstitutionName","Subject","ProcurementName","AgreementStartDate",
-                       "AgreementEndDate","ContractDate","ContractNumber","NumberOfOffers","VendorName","ContractPrice"]]
+        df_5t = df_5t[["ProcessNumber","ContractingInstitutionName","Subject","ProcurementName","AgreeementDurationMonthsDays",
+                       "ContractDate","ContractNumber","NumberOfOffers","VendorName","ContractPrice"]]
         df_5t = df_5t.sort_values(by='ContractDate', ascending=True)
         df_5t = df_5t.drop_duplicates(subset='ProcessNumber') ### newline
         df_5t['ContractDate'] = pd.to_datetime(df.ContractDate, format='%Y-%M-%d')
@@ -549,8 +552,8 @@ def server(input, output, session):
     @reactive.Calc
     def filter_6():
         df_6 = df_111[df_111['VendorName'] == input.selectize_for11()]
-        df_6 = df_6[["ProcessNumber","ContractingInstitutionName","Subject","ProcurementName","AgreementStartDate",
-                     "AgreementEndDate","ContractDate","ContractNumber","NumberOfOffers","VendorName","ContractPrice"]]
+        df_6 = df_6[["ProcessNumber","ContractingInstitutionName","Subject","ProcurementName","AgreeementDurationMonthsDays",
+                     "ContractDate","ContractNumber","NumberOfOffers","VendorName","ContractPrice"]]
         return df_6.sort_values(by='ContractPrice', ascending=False)
     @render.data_frame
     def df_6():
