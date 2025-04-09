@@ -10,8 +10,8 @@ from shiny import App, render, ui, reactive, req, ui
 
 #df = pd.read_excel('ContractsALL.xlsx')
 
-with open("ContractsSMALL.csv", 'rb') as f:
-#with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
+#with open("ContractsSMALL.csv", 'rb') as f:
+with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
     bom = f.read(2)
 
 if bom == b'\xff\xfe':
@@ -21,12 +21,18 @@ elif bom == b'\xfe\xff':
 else:
     print('File does not have a BOM, so the version of UTF-16 is unknown')
 
-with open("ContractsSMALL.csv", 'rb') as f:
-#with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
+#with open("ContractsSMALL.csv", 'rb') as f:
+with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
 df = pd.read_csv(io.StringIO(decoded_data), sep=';')
+#df = pd.read_csv(
+    #io.StringIO(decoded_data), 
+    #sep=';', 
+    #dtype={13: str, 16: str},
+    #low_memory=False
+#)
 
 df_111 = df[df['NumberOfOffers'] == 1]
 df_10 = df.copy()
@@ -58,7 +64,7 @@ formatted_data = {item: item for item in col_names if item not in exclude_cols}
 
 #PREVIEW
 app_ui = ui.page_navbar(
-#    shinyswatch.theme.lumen(),
+ #   shinyswatch.theme.lumen(),
 # 1TAB preview
     ui.nav_panel(
     ui.output_image("image", height = "60%"),
@@ -68,7 +74,7 @@ app_ui = ui.page_navbar(
         ui.row(
         ui.card(  
             ui.card_header("ИЗВОР НА ПОДАТОЦИТЕ"),
-            ui.p("Податоците во оваа апликација се превземени од Електронскиот систем за јавни набавки - ЕСЈН во делот на склучени договори објавени во системот во период 01.01.2021 до 11.11.2024"),
+            ui.p("Податоците во оваа апликација се превземени од Електронскиот систем за јавни набавки - ЕСЈН во делот на склучени договори објавени во системот во период 01.01.2022 до 31.12.2024"),
             ),
         ui.card(
             ui.card_header("СТАТИСТИЧКИ ПОДАТОЦИ"),
@@ -105,6 +111,7 @@ app_ui = ui.page_navbar(
         "Склучени договори",
         ui.h2({"style": "text-align: center;background-color:darkgoldenrod; margin-top: 80px;"}, ""),
         ui.output_image("image3", height="50%"),
+        ui.HTML("<br><br>"),  # Adding empty space
         ui.row(
             ui.column(
             6,
@@ -119,11 +126,11 @@ app_ui = ui.page_navbar(
             "Кликнете, избришете го постоечкиот избор и потоа одберете или внесете го субјектот",
             #id="btn_tooltip",
              ),
-            ui.output_text("company"),
+            #ui.output_text("company"),
             ),
             ui.column(
             6,
-            ui.input_date_range("daterange", " ПЕРИОД:", start="2021-01-01" , width="450px"), ##START need corespondent with CSV#
+            ui.input_date_range("daterange", " ПЕРИОД:", start="2022-01-01" , width="450px"), ##START need corespondent with CSV#
             ),
             ui.input_checkbox_group(  
                 "checkbox_columns",  
@@ -143,7 +150,8 @@ app_ui = ui.page_navbar(
     ui.nav_panel(
         "Преглед на набавки",
         ui.h2({"style": "text-align: center;background-color:darkgoldenrod; margin-top: 80px;"}, ""),
-        ui.output_image("image4", height="50%"),    
+        ui.output_image("image4", height="50%"),
+            ui.HTML("<br><br>"),  # Adding empty space
             ui.row(
                 ui.column(
                 6,
@@ -176,6 +184,7 @@ app_ui = ui.page_navbar(
         "Податоци по носител на набавка",
         ui.h2({"style": "text-align: center;background-color:darkgoldenrod; margin-top: 80px;"}, ""),
         ui.output_image("image5", height="50%"), 
+            ui.HTML("<br><br>"),  # Adding empty space
             ui.row(
                 ui.column(
                 6,
@@ -194,7 +203,7 @@ app_ui = ui.page_navbar(
                 #ui.output_text('subject'),
                 ui.column(
                 6,
-                    ui.input_date_range("daterange1", "ПЕРИОД:", start="2021-01-01" , width="450px"), 
+                    ui.input_date_range("daterange1", "ПЕРИОД:", start="2022-01-01" , width="450px"), 
                 ),
             ),
         ui.row(
@@ -209,6 +218,7 @@ app_ui = ui.page_navbar(
         "Договори со 1 понуда",
         ui.h2({"style": "text-align: center;background-color:darkgoldenrod; margin-top: 80px;"}, ""),
         ui.output_image("image6", height="50%"),
+        ui.HTML("<br><br>"),  # Adding empty space
         ui.row(
                 ui.column(
                 6,
@@ -226,11 +236,15 @@ app_ui = ui.page_navbar(
                 ),
                 ui.column(
                 6,
-                ui.tags.h4({"style": "text-align: center;background-color:darkgoldenrod; margin-top: 35px;"},""),
-                ui.tags.h4({"style": "background-color:Goldenrod; color:white;"},"Од вкупно" + str(len(df)) + " склучени договори преку ЕСЈН, " + str(len(df_111)) + " се со само 1 понуда."),
+                ui.tags.h5({"style": "text-align: center;background-color:darkgoldenrod; margin-top: 35px;"},""),
+                ui.tags.h5({"style": "background-color:Goldenrod; color:white;"},"Од вкупно " + str(len(df)) + " склучени договори преку ЕСЈН, " + str(len(df_111)) + " се со само 1 понуда."),
                     ),
             ),
-        ui.output_plot("plot1", height='400px', fill=False),     
+        ui.output_plot("plot1", height='400px', fill=False),
+                ui.row(
+        ui.column(3),
+        ui.column(8, ui.download_button("downloadData2", "Преземи податоци", width="800px", class_="btn-primary")),
+        ),   
         ui.tags.h5("Подредена табела по вредност на склучените договори"), 
         ui.output_data_frame("df_5"),
     ),
@@ -239,6 +253,7 @@ app_ui = ui.page_navbar(
         "Договори со 1 понуда по Носител на набавка",
             ui.h2({"style": "text-align: center;background-color:darkgoldenrod; margin-top: 80px;"}, ""),
             ui.output_image("image7", height="50%"),
+            ui.HTML("<br><br>"),  # Adding empty space
             ui.tooltip(
             ui.input_selectize(
             "selectize_for11",
@@ -275,6 +290,7 @@ app_ui = ui.page_navbar(
         "УПАТСТВО",
         ui.h3({"style": "text-align: center;background-color:powderblue; margin-top: 80px;"}, ""),
         ui.output_image("image9", height="50%"),
+        ui.HTML("<br><br>"),  # Adding empty space
     ui.markdown(
     """
 Апликацијата за пребарување и преземање на податоци од склучени договори по јавни набавки, се базира на податоците кои Бирото за јавни набавки ги објавува на Електронскиот систем за јавни набавки (ЕСЈН) во делот на склучени договори.
@@ -327,7 +343,7 @@ def server(input, output, session):
 
     @render.image
     def image():
-        return render_image("logo.png", "80px")
+        return render_image("logo.png", "60px")
     @render.image
     def image2():
         return render_image("dzrA.jpg")
@@ -401,32 +417,33 @@ def server(input, output, session):
         #df_export.loc[:, 'ID'] = range(1, len(df_export) + 1) 
 
             # Sort the DataFrame by 'ProcessNumber' in descending order
-        df_export = df_export.sort_values(by='ProcessNumber', ascending=False)
+        df_export = df_export.sort_values(by='ProcessNumber', ascending=True)
         df_export = pd.DataFrame(df_export)
 
         # Find duplicate rows based on 'ProcessNumber' and keep the first occurrence
         df_export['EstimatedPrice'] = df_export.groupby('ProcessNumber')['EstimatedPrice'].transform(lambda x: x.mask(x.duplicated(keep='first'), 0))
 
-        # Assign IDs in ascending order
+        # Assign IDs in scending order
         df_export['ID'] = range(1, len(df_export) + 1)
 
         # List of columns in the desired order
         df_export = df_export[['ID','A','A','A','A','EstimatedPrice', 'A', 'OfferTypeName',
                                'UseElectronicTools','ProcessNumber','IsDevided','ProcedureName','Subject','ContractNumber',
                                'ContractDate','ProcurementName','VendorName','ContractPriceWithoutVat']]  ###added 'ProcessNumber'and 'IsDevided'
-        return df_export.sort_values(by='ProcessNumber', ascending=False)
+        #return df_export.sort_values(by='ProcessNumber', ascending=True)
+        return df_export
     @render.download(
-        filename=lambda: f"JN_SUBJEKT.xlsx")
-        #filename=lambda: f"ZaObrazec_JN_new.csv")
+        ##filename=lambda: f"JN_SUBJEKT.xlsx")
+        filename=lambda: f"ZaObrazec_JN_new.csv")
     def downloadData():
         df = export()
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False, sheet_name='Sheet1')
-        output.seek(0)
-        return output.read(), "export.xlsx"
-        #yield df.to_csv(sep= ';', encoding= 'UTF-8') 
-        ##df.to_string(index=False)
+        ##output = io.BytesIO()
+        ##with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            ##df.to_excel(writer, index=False, sheet_name='Sheet1')
+        ##output.seek(0)
+        ##return output.read(), "export.xlsx"
+        yield df.to_csv(sep= ';', encoding= 'UTF-8', index=False) 
+        ####df.to_string(index=False)
 
 # 3TAB ### plots ###
     @render.text
@@ -507,16 +524,16 @@ def server(input, output, session):
         filter_3()
         )
     @render.download(
-        filename=lambda: f"JN_NOSITEL.xlsx")
-        #filename=lambda: f"JN_po_nositel.csv")
+        #filename=lambda: f"JN_NOSITEL.xlsx")
+        filename=lambda: f"JN_NOSITEL.csv")
     def downloadData1():
         df = export1()
-        output = io.BytesIO()
-        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-            df.to_excel(writer, index=False, sheet_name='Sheet1')
-        output.seek(0)
-        return output.read(), "export.xlsx"
-        #yield df.to_csv(sep= ';', encoding= 'UTF-8')
+        #output = io.BytesIO()
+        #with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            #df.to_excel(writer, index=False, sheet_name='Sheet1')
+        #output.seek(0)
+        #return output.read(), "export.xlsx"
+        yield df.to_csv(sep= ';', encoding= 'UTF-8', index=False)
 
 # 5TAB ### 1 OFFER by SUBJECT review ###
     @reactive.Calc
@@ -544,11 +561,28 @@ def server(input, output, session):
         ax.set_xlabel("Дата на договор")
         ax.set_ylabel("Број на набавки со 1 понуда")
         return ax
+    @reactive.Calc
+    def export2():
+        #df = filter_3()
+        df_export2 = filter_5()
+        return df_export2
+    @output
     @render.data_frame
     def df_5():
         return render.DataGrid(
-        filter_5()  
+        filter_5t()  
         )
+    @render.download(
+        #filename=lambda: f"JN_NOSITEL_1ponuda.xlsx")
+        filename=lambda: f"JN_NOSITEL_1ponuda.csv")
+    def downloadData2():
+        df = export2()
+        #output = io.BytesIO()
+        #with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            #df.to_excel(writer, index=False, sheet_name='Sheet1')
+        #output.seek(0)
+        #return output.read(), "export.xlsx"
+        yield df.to_csv(sep= ';', encoding= 'UTF-8', index=False)
     
 # 6TAB ### 1 OFFER by VENDOR review ###
     @reactive.Calc
