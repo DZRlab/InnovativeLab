@@ -1,0 +1,18 @@
+{
+    "arn:aws:bedrock:us-east-1:419723561910:inference-profile/us.anthropic.claude-3-5-sonnet-20241022-v2:0": {
+        "display": "Claude 3.5 Sonnet (v2)",
+        "max_chars": 131072,
+        "client": "",
+        "endpoint": "bedrock",
+        "input_token_price": 0.003,
+        "output_token_price": 0.015
+    },
+    "anthropic.claude-3-5-sonnet-20240620-v1:0": {
+        "display": "Claude 3.5 Sonnet",
+        "max_chars": 131072,
+        "client": "",
+        "endpoint": "bedrock",
+        "input_token_price": 0.003,
+        "output_token_price": 0.015
+    }
+}
