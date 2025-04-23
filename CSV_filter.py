@@ -1,6 +1,6 @@
 import pandas as pd
 import io
-with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
+with open("D:\\test\InnovativeLab\Contracts.csv", 'rb') as f:
     bom = f.read(2)
 
 if bom == b'\xff\xfe':
@@ -10,7 +10,7 @@ elif bom == b'\xfe\xff':
 else:
     print('File does not have a BOM, so the version of UTF-16 is unknown')
 
-with open("D:\\test\InnovativeLab\ContractsSMALL.csv", 'rb') as f:
+with open("D:\\test\InnovativeLab\Contracts.csv", 'rb') as f:
     data = f.read()
     decoded_data = data.decode('utf-16-le', errors='ignore')
 
