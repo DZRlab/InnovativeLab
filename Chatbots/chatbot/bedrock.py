@@ -4,14 +4,6 @@ import json
 import logging
 import re
 
-AWS_BEDROCK_ACCESS_KEY_ID = "AKIAWDOLZJO3L77CYTVU"
-AWS_BEDROCK_SECRET_ACCESS_KEY = "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"
-AWS_BEDROCK_REGION = ("xxx", "us-east-1")
-
-# AWS S3 Bucket Configuration
-BUCKET_NAME = "kunnskapsbase-fin-standarder"
-BUCKET_ID = "ZEY9KPHQLS"
-
 # Model ID
 model_id = "anthropic.claude-3-5-haiku-20241022-v1:0"
 
