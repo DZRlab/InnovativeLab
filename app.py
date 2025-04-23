@@ -78,7 +78,7 @@ app_ui = ui.page_navbar(
         ui.row(
         ui.card(  
             ui.card_header("ИЗВОР НА ПОДАТОЦИТЕ"),
-            ui.p("Податоците во оваа апликација се превземени од Електронскиот систем за јавни набавки - ЕСЈН во делот на склучени договори објавени во системот во период 01.01.2022 до 31.12.2024"),
+            ui.p("Податоците во оваа апликација се превземени од Електронскиот систем за јавни набавки - ЕСЈН во делот на склучени договори објавени во системот во период 01.01.2020 до 31.12.2024"),
             ),
         ui.card(
             ui.card_header("СТАТИСТИЧКИ ПОДАТОЦИ"),
@@ -134,7 +134,7 @@ app_ui = ui.page_navbar(
             ),
             ui.column(
             6,
-            ui.input_date_range("daterange", " ПЕРИОД:", start="2022-01-01" , width="450px"), ##START need corespondent with CSV#
+            ui.input_date_range("daterange", " ПЕРИОД:", start="2020-01-01" , end="2024-12-31", width="450px"), ##START need corespondent with CSV#
             ),
             ui.input_checkbox_group(  
                 "checkbox_columns",  
@@ -207,7 +207,7 @@ app_ui = ui.page_navbar(
                 #ui.output_text('subject'),
                 ui.column(
                 6,
-                    ui.input_date_range("daterange1", "ПЕРИОД:", start="2022-01-01" , width="450px"), 
+                    ui.input_date_range("daterange1", "ПЕРИОД:", start="2020-01-01" , end="2024-12-31", width="450px"), 
                 ),
             ),
         ui.row(
@@ -247,7 +247,8 @@ app_ui = ui.page_navbar(
         ui.output_plot("plot1", height='400px', fill=False),
                 ui.row(
         ui.column(3),
-        ui.column(8, ui.download_button("downloadData2", "Преземи податоци", width="800px", class_="btn-primary")),
+        ui.column(8, 
+            ui.download_button("downloadData2", "Преземи податоци", width="800px", class_="btn-primary")),
         ),   
         ui.tags.h5("Подредена табела по вредност на склучените договори"), 
         ui.output_data_frame("df_5"),
@@ -304,7 +305,7 @@ https://www.e-nabavki.gov.mk/PublicAccess/home.aspx#/contracts/0
 Со апликацијата можете да ги пребарувате и преземате податоците за склучени договори по јавни набавки од страна на субјектите, при што можете да селектирате набавки склучени од одреден субјект, за одреден период како и набавки по одреден вид на набавки за повеќе субјекти.  
 
 За употреба на **ИЗБОР НА СУБЈЕКТ** или **ИЗБОР НА НОСИТЕЛ НА НАБАВКА** потребно е да кликнете на малиот триаголник десно на полето за избор, да го избришете полето со **backspace** и како ги внесувате буквите од името на субјектот така истите се филтрираат и го одбирате субјектот за кои ви требаат податоци.  
-При Анализа на податоци по но**сител на набавка** во полето **Одбери најголема вредност** ја внесувате максималната вредност за јавните набавки за кои сакате податоци и истата ќе се прикаже на лизгачот за **Одбери опсег на вредноста на Јавните набавки**.  
+При Анализа на податоци по **носител на набавка** во полето **Одбери најголема вредност** ја внесувате максималната вредност за јавните набавки за кои сакате податоци и истата ќе се прикаже на лизгачот за **Одбери опсег на вредноста на Јавните набавки**.  
 
 Во апликацијата се дефинирани повеќе табови и тоа:  
 
@@ -325,9 +326,10 @@ https://www.e-nabavki.gov.mk/PublicAccess/home.aspx#/contracts/0
 
 
 Откако ќе ги селектирате сите колони за кои сакате да ги преземете податоците, стартувајте го копчето **`ПРЕЗЕМИ ПОДАТОЦИ за ОБРАЗЕЦ ЈНПР и ЈНПП`**.
-Податоците ќе се снимат pod име JN_SUBJEKT.xlsx во папката Downloads и за да можете да ги користите, потребно е да ги вчитате во Еxcel и притоа во процесот на вчитување ќе треба да потврдите дека податоците се од доверлив извор.
-На ист начин се снимаат и користат преземените податоци кои се однесуваат за Носител на Јавната набавка: JN_NOSITEL.xlsx.
+Податоците ќе се снимат под име ime_na_subjekt_JNPRiJNPP.csv во папката Downloads и за да можете да ги користите, потребно е да го отворите FinalenObrazecJNPRiJNPP_za_CSV и притоа во процесот на вчитување ќе треба да го импортирате снимениот csv фајл.
+Потребно е формираниот Образец да го снимите како ексел фајл.
 
+За преземање на податоци во табовите по **носител на набавка** и во табот **договори со една понуда**, при генерирање на csv датотеката и нејзино снимање во папката downloads, потребно е да отворите нов ексел документ и да го внесете истиот со Data > Import > from csv  и да го вчитате на тој начин во ексел.
 """
     )),
 
@@ -438,7 +440,8 @@ def server(input, output, session):
         return df_export
     @render.download(
         ##filename=lambda: f"JN_SUBJEKT.xlsx")
-        filename=lambda: f"ZaObrazec_JN_new.csv")
+        filename=lambda: f"{filter()['ContractingInstitutionName'].iloc[0]}JNPRiJNPP.csv")
+        #filename=lambda: f"ZaObrazec_JN_new.csv")
     def downloadData():
         df = export()
         ##output = io.BytesIO()
@@ -529,7 +532,8 @@ def server(input, output, session):
         )
     @render.download(
         #filename=lambda: f"JN_NOSITEL.xlsx")
-        filename=lambda: f"JN_NOSITEL.csv")
+        filename=lambda: f"{export1()['VendorName'].iloc[0]}2020do2024.csv")
+        #filename=lambda: f"JN_NOSITEL.csv")
     def downloadData1():
         df = export1()
         #output = io.BytesIO()
@@ -577,8 +581,9 @@ def server(input, output, session):
         filter_5t()  
         )
     @render.download(
-        #filename=lambda: f"JN_NOSITEL_1ponuda.xlsx")
-        filename=lambda: f"JN_NOSITEL_1ponuda.csv")
+        ##filename=lambda: f"JN_NOSITEL_1ponuda.xlsx")
+        filename=lambda: f"{export2()['ContractingInstitutionName'].iloc[0]}so1ponuda202do2024.csv")
+        #filename=lambda: f"JN_NOSITEL_1ponuda.csv")
     def downloadData2():
         df = export2()
         #output = io.BytesIO()
