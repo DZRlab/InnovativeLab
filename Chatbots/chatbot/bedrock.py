@@ -8,10 +8,10 @@ import re
 model_id = "anthropic.claude-3-5-haiku-20241022-v1:0"
 
 boto3.setup_default_session(
-    aws_access_key_id=os.environ.get("AWS_ACCESS_KEY_ID"),
-    aws_secret_access_key=os.environ.get("AWS_SECRET_ACCESS_KEY"),
+    aws_access_key_id=os.environ.get("blabla"),
+    aws_secret_access_key=os.environ.get("blabla"),
     region_name=
-    os.environ.get("AWS_REGION", "us-east-1"),
+    os.environ.get("blabla", "us-east-1"),
 )
 
 s3_session = boto3.Session(
