@@ -10,6 +10,8 @@ from shiny import App, render, ui, reactive, req, ui
 
 #df = pd.read_excel('ContractsALL.xlsx')
 
+# test comment
+
 # use this line when running on the shiny server
 with open("ContractsSMALL.csv", 'rb') as f:
 # use this line when running locally
