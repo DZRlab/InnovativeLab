@@ -12,6 +12,7 @@ from shiny import App, render, ui, reactive, req, ui
 
 # test merge_temp
 # another test
+# more test
 
 # use this line when running on the shiny server
 with open("ContractsSMALL.csv", 'rb') as f:
